@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vigenère Autokey - Grass EAD</title>
+    <link rel="stylesheet" href="../css/output.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body class="min-h-screen bg-amber-50 dark:bg-gray-900">
+    <nav
+        class="sticky top-0 z-50 bg-amber-100 dark:bg-gray-900 border-b border-amber-200 dark:border-gray-700 backdrop-blur-sm">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="../index.html" class="flex items-center space-x-3">
+                <span class="text-2xl font-semibold dark:text-white">🌿 Grass EAD - Vigenère Autokey</span>
+            </a>
+            <div class="flex items-center space-x-3">
+                <button id="theme-toggle" type="button"
+                    class="text-gray-500 dark:text-gray-400 hover:bg-amber-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                            fill-rule="evenodd" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <a href="../index.html" class="text-blue-600 hover:underline dark:text-blue-400">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-screen-xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">🔐 Vigenère với khoá tự động (Autokey)</h1>
+
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                <strong>Quy tắc:</strong> Dấu chấm (.) → ТЧК, Dấu phẩy (,) → ЗПТ.
+                <br>
+                <strong>Cách hoạt động:</strong>
+                <br>
+                • <strong>Gamma = Khoá + Văn bản gốc</strong> (tự động mở rộng)
+                <br>
+                • Mỗi ký tự được dịch chuyển theo gamma tương ứng
+                <br>
+                • Ví dụ: Khoá = <code>А</code>, Văn bản = <code>ПРИВЕТ</code> → Gamma = <code>АПРИВЕТ</code>
+                <br>
+                Kết quả được chia thành cụm 5 ký tự, cách nhau bằng dấu cách.
+            </p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Controls -->
+            <div
+                class="flex flex-wrap items-center gap-4 p-4 bg-amber-100 dark:bg-gray-800 rounded-lg shadow border border-amber-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <button id="mode-encrypt"
+                        class="px-4 py-2 bg-purple-600 border-2 border-purple-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                        🔐 Mã hoá
+                    </button>
+                    <button id="mode-decrypt"
+                        class="px-4 py-2 bg-transparent border-2 border-teal-500 text-teal-500 dark:text-teal-400 rounded-lg text-sm font-medium transition-colors hover:bg-teal-50 dark:hover:bg-teal-900/20">
+                        🔓 Giải mã
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                    <label class="text-sm font-medium dark:text-white whitespace-nowrap">Khoá ban đầu:</label>
+                    <input type="text" id="key-input" value=""
+                        class="flex-1 px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                        placeholder="А" />
+                </div>
+            </div>
+
+            <!-- Key Info -->
+            <div id="key-info" class="flex items-center gap-3 text-sm p-3 bg-amber-50 dark:bg-gray-800 rounded-lg">
+                <span class="font-medium text-gray-700 dark:text-gray-300">Khoá ban đầu:</span>
+                <span class="font-mono font-bold text-blue-600 dark:text-blue-400">А</span>
+                <span class="text-gray-500 dark:text-gray-400">(1 ký tự)</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">Gamma = Khoá + Văn bản</span>
+            </div>
+
+            <!-- Input/Output -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label id="input-label" class="text-sm font-medium dark:text-white">Văn bản gốc</label>
+                        <div class="flex items-center gap-2">
+                            <button id="paste-btn"
+                                class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-paste mr-1"></i> Dán
+                            </button>
+                            <button id="copy-input-btn"
+                                class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-copy mr-1"></i> Sao chép
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="vigenere-input" class="input-area"
+                        placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ, МИР.)"></textarea>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label id="output-label" class="text-sm font-medium dark:text-white">Văn bản mã hoá</label>
+                        <div class="flex items-center gap-2">
+                            <button id="copy-output-btn"
+                                class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-copy mr-1"></i> Sao chép
+                            </button>
+                            <button id="clear-btn"
+                                class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-trash mr-1"></i> Xoá
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="vigenere-output" class="input-area" placeholder="Kết quả sẽ hiển thị ở đây"
+                        readonly></textarea>
+                </div>
+            </div>
+
+            <!-- Bảng Gamma -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        📋 Bảng Gamma (Khoá tự động)
+                        <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+                            <span id="view-mode-label" class="text-purple-600 dark:text-purple-400">(Ngang)</span>
+                        </span>
+                    </h2>
+                    <button id="view-toggle"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        📄 Xem dọc
+                    </button>
+                </div>
+                <div id="vigenere-table"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/vigenere-autokey.js"></script>
+</body>
+
+</html>
