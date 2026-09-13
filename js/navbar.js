@@ -294,27 +294,45 @@
         const basePath = isInPages ? '../' : '';
         const cacheBust = '?v=' + Date.now();
 
-        // ===== Load navbar =====
+        // ===== Load navbar (có cache) =====
         const navbarPh = document.getElementById('navbar-placeholder');
         if (navbarPh) {
+            // Thử đọc từ sessionStorage trước
+            let cachedHtml = null;
             try {
-                const res = await fetch(basePath + 'components/navbar.html' + cacheBust);
-                if (res.ok) {
-                    navbarPh.innerHTML = await res.text();
+                cachedHtml = sessionStorage.getItem('navbar-html');
+            } catch (e) { }
 
-                    // Rewrite TẤT CẢ link bắt đầu bằng "/" (không chỉ ở /pages/)
-                    const prefix = isInPages ? '..' : '.';
-                    navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
-                        a.setAttribute('href', prefix + a.getAttribute('href'));
-                    });
-
-                    // Đưa sticky lên placeholder — nav bên trong không tự stick
-                    // được vì placeholder chỉ cao bằng nav
-                    navbarPh.classList.add('sticky', 'top-0', 'z-40');
+            if (cachedHtml) {
+                // Có cache → inject ngay, không cần chờ
+                navbarPh.innerHTML = cachedHtml;
+                applyCachedNavbar(navbarPh);
+            } else {
+                // Chưa có cache → fetch
+                try {
+                    const res = await fetch(basePath + 'components/navbar.html' + cacheBust);
+                    if (res.ok) {
+                        const html = await res.text();
+                        navbarPh.innerHTML = html;
+                        applyCachedNavbar(navbarPh);
+                        // Lưu cache cho lần sau
+                        try {
+                            sessionStorage.setItem('navbar-html', html);
+                        } catch (e) { }
+                    }
+                } catch (err) {
+                    console.error('[Navbar] Load error:', err);
                 }
-            } catch (err) {
-                console.error('[Navbar] Load error:', err);
             }
+        }
+
+        // Hàm phụ để rewrite link + sticky
+        function applyCachedNavbar(navbarPh) {
+            const prefix = isInPages ? '..' : '.';
+            navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
+                a.setAttribute('href', prefix + a.getAttribute('href'));
+            });
+            navbarPh.classList.add('sticky', 'top-0', 'z-40');
         }
 
         // ===== Load footer =====

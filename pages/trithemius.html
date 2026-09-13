@@ -2,6 +2,15 @@
 <html lang="vi" class="light">
 
 <head>
+    <script>
+        (function () {
+            try {
+                var s = localStorage.getItem('theme');
+                var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+            } catch (e) { }
+        })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trithemius - Grass EAD</title>

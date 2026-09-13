@@ -18,6 +18,7 @@
   --color-primary-900: #1e3a8a;
 }
 
+
 /* ==================== CUSTOM SCROLLBAR ==================== */
 
 /* --- Textarea input/output (.input-area) --- */
@@ -307,3 +308,40 @@ html.os-other .kbd-ctrl {
 }
 
 /* Trên mobile (< md): thanh search đã ẩn rồi nên không cần lo kbd */
+
+/* ==================== PAGE TRANSITION ==================== */
+/*
+ * KHÔNG dùng View Transitions API vì navbar / sidebar / footer
+ * được inject async qua fetch() — snapshot chụp page mới sẽ RỖNG
+ * ở các vị trí này, gây hiện tượng "trống rồi hiện".
+ *
+ * Giải pháp: chỉ dùng CSS animation fade-in cho <main>.
+ * - Fade-in ngắn (0.35s) — không đủ dài để cảm nhận rõ
+ * - Dịch chuyển nhẹ (6px) — tạo cảm giác mượt, không nhảy cục
+ * - Easing "ease-out expo" — nhanh ở đầu, chậm dần ở cuối
+ * - only main — navbar và footer đứng yên, không gây rối mắt
+ */
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main {
+  animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* Tôn trọng người dùng bật "reduce motion" */
+@media (prefers-reduced-motion: reduce) {
+  main {
+    animation: none;
+  }
+}
