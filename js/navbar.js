@@ -2,6 +2,25 @@
 (function () {
     'use strict';
 
+    // ==================== OS DETECTION ====================
+    function detectOS() {
+        const html = document.documentElement;
+
+        // iPadOS 13+ báo UA giống macOS nhưng có touchpoints
+        const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+        const isMac = /Mac|iPhone|iPod/.test(navigator.platform) || isIPadOS;
+
+        html.classList.remove('os-mac', 'os-other');
+        if (isMac) {
+            html.classList.add('os-mac');
+        } else {
+            html.classList.add('os-other');
+        }
+    }
+
+    // Chạy NGAY khi script parse — trước cả khi fetch navbar
+    detectOS();
+
     // ===== Config =====
     const NAVBAR_ALGORITHMS = [
         { id: 'caesar', name: 'Caesar', path: '/pages/caesar.html', icon: 'fa-arrow-right-arrow-left', color: 'blue', desc: 'Dịch chuyển theo shift' },
@@ -16,6 +35,7 @@
 
     let isInPages = false;
     let searchState = { selectedIndex: 0, matches: [] };
+    let suppressHoverSelection = false;
 
     // ===== Helpers =====
     // Luôn prefix link bằng đường dẫn tương đối để không trỏ về server root
@@ -141,14 +161,14 @@
                 <li>
                     <a href="${getFullPath(a.path)}" data-index="${i}"
                         class="search-result-item flex items-center gap-3 px-3 py-3 mx-1 rounded-xl transition-colors group">
-                        <span class="w-11 h-11 rounded-xl ${colorClasses(a.color)} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <i class="fas ${a.icon}"></i>
+                        <span class="w-12 h-12 rounded-xl ${colorClasses(a.color)} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas ${a.icon} text-lg"></i>
                         </span>
                         <span class="flex-1 min-w-0">
-                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">${a.name}</span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">${a.desc}</span>
+                            <span class="block text-base font-semibold text-gray-900 dark:text-white">${a.name}</span>
+                            <span class="block text-sm text-gray-500 dark:text-gray-400 truncate">${a.desc}</span>
                         </span>
-                        <i class="fas fa-arrow-right text-xs text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
+                        <i class="fas fa-arrow-right text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                     </a>
                 </li>
             `;
@@ -159,14 +179,16 @@
         updateSearchSelected();
     }
 
-    function updateSearchSelected() {
+    function updateSearchSelected(shouldScroll = true) {
         const results = document.getElementById('search-popup-results');
         if (!results) return;
         const items = results.querySelectorAll('.search-result-item');
         items.forEach((item, i) => {
             if (i === searchState.selectedIndex) {
                 item.classList.add('bg-amber-50', 'dark:bg-gray-700/50');
-                item.scrollIntoView({ block: 'nearest' });
+                if (shouldScroll) {
+                    item.scrollIntoView({ block: 'nearest' });
+                }
             } else {
                 item.classList.remove('bg-amber-50', 'dark:bg-gray-700/50');
             }
@@ -178,7 +200,7 @@
         if (window.__navbarEventsBound) return;
         window.__navbarEventsBound = true;
 
-        // Click
+        // ===== Click =====
         document.addEventListener('click', function (e) {
             if (e.target.closest('#theme-toggle')) { toggleTheme(); return; }
 
@@ -198,7 +220,7 @@
             }
         });
 
-        // Keydown: ESC đóng search + Ctrl/Cmd+K mở search
+        // ===== Keydown global: ESC đóng search + Ctrl/Cmd+K mở search =====
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 const searchPopup = document.getElementById('search-popup');
@@ -214,7 +236,7 @@
             }
         });
 
-        // Input cho search
+        // ===== Input cho search =====
         document.addEventListener('input', function (e) {
             if (e.target.id === 'search-popup-input') {
                 const clearBtn = document.getElementById('search-popup-clear');
@@ -223,21 +245,45 @@
             }
         });
 
-        // Navigation trong search
+        // ===== Navigation trong search (ArrowUp / ArrowDown / Enter) =====
         document.addEventListener('keydown', function (e) {
             if (e.target.id !== 'search-popup-input') return;
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
+                suppressHoverSelection = true;
                 searchState.selectedIndex = Math.min(searchState.selectedIndex + 1, searchState.matches.length - 1);
                 updateSearchSelected();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
+                suppressHoverSelection = true;
                 searchState.selectedIndex = Math.max(searchState.selectedIndex - 1, 0);
                 updateSearchSelected();
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 const match = searchState.matches[searchState.selectedIndex];
                 if (match) window.location.href = getFullPath(match.path);
+            }
+        });
+
+        // ===== Reset cờ suppress khi chuột THỰC SỰ di chuyển =====
+        document.addEventListener('mousemove', function () {
+            suppressHoverSelection = false;
+        });
+
+        // ===== Hover chuột trên kết quả → đổi selection (DUY NHẤT) =====
+        document.addEventListener('mouseover', function (e) {
+            if (suppressHoverSelection) return;
+
+            const item = e.target.closest('.search-result-item');
+            if (!item) return;
+
+            const popup = document.getElementById('search-popup');
+            if (!popup || popup.style.display === 'none') return;
+
+            const idx = parseInt(item.dataset.index);
+            if (!isNaN(idx) && idx !== searchState.selectedIndex) {
+                searchState.selectedIndex = idx;
+                updateSearchSelected(false);
             }
         });
     }

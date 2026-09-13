@@ -11,10 +11,15 @@
                     aria-label="Mở công cụ" aria-controls="tools-drawer">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
-                <a href="/index.html" class="flex flex-col leading-tight group">
+                <a href="/index.html" class="group flex items-baseline gap-1.5">
                     <span
-                        class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Grass
-                        EAD</span>
+                        class="text-2xl font-bold text-amber-950 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors leading-none">
+                        Grass
+                    </span>
+                    <span
+                        class="hidden sm:inline-block text-[10px] tracking-[0.15em] font-semibold text-amber-700 dark:text-amber-400 -translate-y-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors whitespace-nowrap">
+                        Encrypt And Decrypt
+                    </span>
                 </a>
             </div>
 
@@ -23,25 +28,27 @@
                 class="hidden md:flex flex-1 max-w-md mx-auto items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50/70 dark:bg-gray-800 border border-amber-200 dark:border-gray-700 text-left text-sm text-gray-500 dark:text-gray-400 hover:bg-amber-100/70 dark:hover:bg-gray-700/70 hover:border-amber-300 dark:hover:border-gray-600 transition-all group">
                 <i class="fas fa-search text-gray-400 group-hover:text-amber-500 transition-colors"></i>
                 <span class="flex-1">Tìm thuật toán...</span>
+                <!-- Windows / Linux: Ctrl+K -->
                 <kbd
-                    class="hidden lg:flex items-center gap-1 text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-0.5">
-                    <i class="fas fa-command text-[8px]"></i>K
+                    class="kbd-ctrl hidden items-center gap-0.5 text-[11px] font-mono text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-0.5">
+                    Ctrl+K
+                </kbd>
+
+                <!-- macOS / iPadOS: ⌘K -->
+                <kbd
+                    class="kbd-mac hidden items-center gap-0.5 text-[12px] font-mono text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-0.5">
+                    <span
+                        style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 13px; line-height: 1;">⌘</span>K
                 </kbd>
             </button>
 
-            <!-- Bên phải: Search mobile + Home + Theme toggle -->
+            <!-- Bên phải: Search mobile + Theme toggle -->
             <div class="flex items-center gap-2 flex-shrink-0">
                 <button id="search-mobile-trigger" type="button"
                     class="md:hidden text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 rounded-lg p-2.5 transition-colors"
                     aria-label="Tìm kiếm">
                     <i class="fas fa-search text-lg"></i>
                 </button>
-
-                <a href="/index.html"
-                    class="hidden sm:flex text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 rounded-lg p-2.5 transition-colors"
-                    aria-label="Trang chủ">
-                    <i class="fas fa-house text-lg"></i>
-                </a>
 
                 <!-- Theme toggle: dùng Font Awesome icon thay vì SVG -->
                 <button id="theme-toggle" type="button"
@@ -76,17 +83,16 @@
 
             <!-- Input row (cố định, không cuộn) -->
             <div class="flex-shrink-0 flex items-center gap-3 px-5 py-4 border-b border-amber-100 dark:border-gray-700">
-                <i class="fas fa-search text-amber-500 text-lg flex-shrink-0"></i>
-                <input type="text" id="search-popup-input" autocomplete="off"
-                    placeholder="Tìm thuật toán... (Caesar, Atbash, Vigenère, ...)"
+                <i class="fas fa-search text-amber-500 text-xl flex-shrink-0"></i>
+                <input type="text" id="search-popup-input" autocomplete="off" placeholder="Tìm thuật toán mã hoá…"
                     class="flex-1 bg-transparent border-0 outline-none text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500" />
                 <button id="search-popup-clear" type="button"
                     class="hidden text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded p-1 transition-colors"
                     aria-label="Xoá">
-                    <i class="fas fa-times-circle"></i>
+                    <i class="fas fa-times-circle text-lg"></i>
                 </button>
                 <kbd
-                    class="hidden sm:flex items-center gap-1 text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-gray-700 border border-amber-200 dark:border-gray-600 rounded px-2 py-1 flex-shrink-0">
+                    class="hidden sm:flex items-center gap-1 text-xs font-mono text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-gray-700 border border-amber-200 dark:border-gray-600 rounded px-2 py-1 flex-shrink-0">
                     ESC
                 </kbd>
             </div>
@@ -96,22 +102,22 @@
 
             <!-- Footer (cố định, không cuộn) -->
             <div
-                class="flex-shrink-0 px-5 py-3 border-t border-amber-100 dark:border-gray-700 bg-amber-50/50 dark:bg-gray-900/40 flex items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1.5">
+                class="flex-shrink-0 px-5 py-3 border-t border-amber-100 dark:border-gray-700 bg-amber-50/50 dark:bg-gray-900/40 flex items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-400">
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-2">
                         <kbd
-                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-1.5 py-0.5 text-[10px]">↑</kbd>
+                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-xs leading-none">↑</kbd>
                         <kbd
-                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-1.5 py-0.5 text-[10px]">↓</kbd>
-                        <span>điều hướng</span>
+                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-xs leading-none">↓</kbd>
+                        <span>Di chuyển</span>
                     </span>
-                    <span class="flex items-center gap-1.5">
+                    <span class="flex items-center gap-2">
                         <kbd
-                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-1.5 py-0.5 text-[10px]">↵</kbd>
-                        <span>mở</span>
+                            class="font-mono bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-xs leading-none">↵</kbd>
+                        <span>Mở</span>
                     </span>
                 </div>
-                <span id="search-popup-count" class="hidden sm:inline"></span>
+                <span id="search-popup-count" class="hidden sm:inline text-xs"></span>
             </div>
         </div>
     </div>

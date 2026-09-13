@@ -290,3 +290,20 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* ==================== KEYBOARD SHORTCUT ==================== */
+/* Mặc định ẩn — chỉ hiện khi <html> có class tương ứng */
+.kbd-ctrl,
+.kbd-mac {
+  display: none;
+}
+
+html.os-mac .kbd-mac {
+  display: inline-flex;
+}
+
+html.os-other .kbd-ctrl {
+  display: inline-flex;
+}
+
+/* Trên mobile (< md): thanh search đã ẩn rồi nên không cần lo kbd */

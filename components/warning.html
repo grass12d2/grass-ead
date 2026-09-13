@@ -1,0 +1,177 @@
+<!-- ==================== WARNING POPUP ==================== -->
+<div id="warning-popup" style="display: none; position: fixed; inset: 0; z-index: 250;">
+    <!-- Backdrop mờ -->
+    <div id="warning-backdrop"
+        style="position: absolute; inset: 0; background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s ease;">
+    </div>
+
+    <!-- Panel -->
+    <div id="warning-panel"
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.92); width: 92vw; max-width: 440px; opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+        <div id="warning-inner"
+            style="position: relative; background: linear-gradient(180deg, #ffffff 0%, #fffdf7 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px -20px rgba(120, 53, 15, 0.35), 0 0 0 1px rgba(251, 191, 36, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9);">
+            <style>
+                .dark #warning-inner {
+                    background: linear-gradient(180deg, #1f2937 0%, #111827 100%) !important;
+                    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+                }
+
+                /* Decorative blob góc trên phải */
+                .dark #warning-blob {
+                    opacity: 0.25 !important;
+                }
+
+                @keyframes warningFloat {
+
+                    0%,
+                    100% {
+                        transform: translateY(0);
+                    }
+
+                    50% {
+                        transform: translateY(-4px);
+                    }
+                }
+
+                #warning-icon-wrap {
+                    animation: warningFloat 3s ease-in-out infinite;
+                }
+
+                @keyframes warningPulse {
+
+                    0%,
+                    100% {
+                        transform: scale(1);
+                        opacity: 0.5;
+                    }
+
+                    50% {
+                        transform: scale(1.15);
+                        opacity: 0.15;
+                    }
+                }
+
+                #warning-icon-pulse {
+                    animation: warningPulse 2.4s ease-in-out infinite;
+                }
+
+                @keyframes warningEntry {
+                    0% {
+                        opacity: 0;
+                        transform: translateY(8px);
+                    }
+
+                    100% {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .warning-stagger>* {
+                    opacity: 0;
+                    animation: warningEntry 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                .warning-stagger>*:nth-child(1) {
+                    animation-delay: 0.10s;
+                }
+
+                .warning-stagger>*:nth-child(2) {
+                    animation-delay: 0.18s;
+                }
+
+                .warning-stagger>*:nth-child(3) {
+                    animation-delay: 0.26s;
+                }
+
+                .warning-stagger>*:nth-child(4) {
+                    animation-delay: 0.34s;
+                }
+
+                #warning-ok {
+                    box-shadow: 0 8px 20px -4px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                }
+
+                #warning-ok:hover {
+                    box-shadow: 0 12px 28px -4px rgba(234, 179, 8, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                    transform: translateY(-1px);
+                }
+
+                #warning-ok:active {
+                    transform: translateY(0);
+                }
+            </style>
+
+            <!-- Decorative gradient blob — góc trên trái -->
+            <div id="warning-blob"
+                style="position: absolute; top: -70px; left: -70px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, rgba(251, 191, 36, 0) 70%); opacity: 0.6; pointer-events: none;">
+            </div>
+
+            <!-- Decorative dot — góc dưới phải -->
+            <div
+                style="position: absolute; bottom: -40px; right: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(250, 204, 21, 0.2) 0%, rgba(250, 204, 21, 0) 70%); pointer-events: none;">
+            </div>
+
+            <!-- Content -->
+            <div class="relative px-7 pt-9 pb-7">
+
+                <!-- Icon -->
+                <div class="flex justify-center mb-5">
+                    <div id="warning-icon-wrap" class="relative">
+                        <!-- Pulse ring -->
+                        <div id="warning-icon-pulse"
+                            class="absolute inset-0 rounded-3xl bg-yellow-300 dark:bg-yellow-500/40"
+                            style="filter: blur(12px);">
+                        </div>
+                        <!-- Icon box -->
+                        <div class="relative w-[68px] h-[68px] rounded-3xl flex items-center justify-center"
+                            style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 6px 16px -4px rgba(234, 179, 8, 0.4), 0 0 0 1px rgba(234, 179, 8, 0.2);">
+                            <i class="fas fa-triangle-exclamation text-3xl" style="color: #b45309;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text block -->
+                <div class="warning-stagger text-center">
+                    <!-- Small badge -->
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3"
+                        style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid rgba(234, 179, 8, 0.35);">
+                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 dark:bg-yellow-400"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em]"
+                            style="color: #92400e;">Beta</span>
+                    </div>
+
+                    <!-- Title -->
+                    <h2
+                        class="text-[22px] font-extrabold text-gray-900 dark:text-white tracking-tight mb-2.5 leading-tight">
+                        Giai đoạn thử nghiệm
+                    </h2>
+
+                    <!-- Description -->
+                    <p class="text-[14px] text-gray-600 dark:text-gray-400 leading-relaxed max-w-[320px] mx-auto mb-7">
+                        Trang đang trong quá trình phát triển — kết quả mã hoá &amp; giải mã
+                        <span class="font-semibold text-amber-700 dark:text-amber-400">có thể chưa chính xác tuyệt
+                            đối</span>.
+                    </p>
+                </div>
+
+                <!-- Action button -->
+                <button id="warning-ok" type="button"
+                    class="w-full py-3.5 font-semibold rounded-2xl transition-all duration-200 text-white"
+                    style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);">
+                    <span class="inline-flex items-center gap-2 text-[15px]">
+                        <i class="fas fa-check-circle"></i>
+                        Đã hiểu, tiếp tục
+                    </span>
+                </button>
+
+                <!-- Footnote -->
+                <p class="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-4 leading-none">
+                    Nhấn <kbd
+                        class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 font-mono text-[10px]">ESC</kbd>
+                    hoặc nhấp ngoài để đóng
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
