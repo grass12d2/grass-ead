@@ -16,9 +16,15 @@
                         class="text-2xl font-bold text-amber-950 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors leading-none">
                         Grass
                     </span>
+                    <!-- Full text: chỉ hiện ở lg+ -->
                     <span
-                        class="hidden sm:inline-block text-[10px] tracking-[0.15em] font-semibold text-amber-700 dark:text-amber-400 -translate-y-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors whitespace-nowrap">
+                        class="hidden lg:inline-block text-[10px] tracking-[0.15em] font-semibold text-amber-700 dark:text-amber-400 -translate-y-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors whitespace-nowrap">
                         Encrypt And Decrypt
+                    </span>
+                    <!-- EAD: hiện ở sm → dưới lg -->
+                    <span
+                        class="hidden sm:inline-block lg:hidden text-[10px] tracking-[0.15em] font-semibold text-amber-700 dark:text-amber-400 -translate-y-2 group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors whitespace-nowrap">
+                        EAD
                     </span>
                 </a>
             </div>
@@ -66,12 +72,12 @@
 <div id="search-popup" style="display: none; position: fixed; inset: 0; z-index: 200;">
     <!-- Backdrop mờ -->
     <div id="search-popup-backdrop"
-        style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.2s ease;">
+        style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.15s ease;">
     </div>
 
     <!-- Panel: căn giữa cả ngang lẫn dọc, kích thước cố định -->
     <div id="search-popup-panel"
-        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); width: 92vw; max-width: 640px; height: 70vh; max-height: 600px; min-height: 320px; opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease;">
+        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); width: 92vw; max-width: 640px; height: 70vh; max-height: 600px; min-height: 320px; opacity: 0; transition: opacity 0.15s ease, transform 0.15s ease;">
         <div id="search-popup-inner"
             style="background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); overflow: hidden; border: 1px solid rgba(251, 191, 36, 0.3); height: 100%; display: flex; flex-direction: column;">
             <style>

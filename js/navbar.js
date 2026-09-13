@@ -99,13 +99,27 @@
         popup.style.display = 'block';
         document.body.style.overflow = 'hidden';
 
-        requestAnimationFrame(() => {
-            backdrop.style.opacity = '1';
-            panel.style.opacity = '1';
-            panel.style.transform = 'translate(-50%, -50%) scale(1)';
-        });
+        const isMobile = window.innerWidth < 768;
+        const fromTransform = isMobile
+            ? 'translate(-50%, 0) scale(0.95)'
+            : 'translate(-50%, -50%) scale(0.95)';
+        const toTransform = isMobile
+            ? 'translate(-50%, 0) scale(1)'
+            : 'translate(-50%, -50%) scale(1)';
 
-        setTimeout(() => input && input.focus(), 80);
+        // Force initial state (re-apply để chắc chắn)
+        panel.style.opacity = '0';
+        panel.style.transform = fromTransform;
+
+        // Force reflow — bắt buộc để transition có điểm bắt đầu
+        panel.getBoundingClientRect();
+
+        // Animate sang trạng thái cuối
+        backdrop.style.opacity = '1';
+        panel.style.opacity = '1';
+        panel.style.transform = toTransform;
+
+        setTimeout(() => input && input.focus(), 60);
     }
 
     function closeSearch() {
@@ -116,9 +130,14 @@
         const clearBtn = document.getElementById('search-popup-clear');
         if (!popup || !backdrop || !panel) return;
 
+        const isMobile = window.innerWidth < 768;
+        const closeTransform = isMobile
+            ? 'translate(-50%, 0) scale(0.95)'
+            : 'translate(-50%, -50%) scale(0.95)';
+
         backdrop.style.opacity = '0';
         panel.style.opacity = '0';
-        panel.style.transform = 'translate(-50%, -50%) scale(0.95)';
+        panel.style.transform = closeTransform;
 
         setTimeout(() => {
             popup.style.display = 'none';
@@ -126,7 +145,7 @@
             if (input) input.value = '';
             if (clearBtn) clearBtn.classList.add('hidden');
             renderSearchResults('');
-        }, 200);
+        }, 160);
     }
 
     function renderSearchResults(query) {

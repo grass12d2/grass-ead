@@ -345,3 +345,14 @@ main {
     animation: none;
   }
 }
+
+/* ==================== SEARCH POPUP PANEL ==================== */
+/* Mobile: đưa popup lên top center thay vì giữa màn hình */
+@media (max-width: 767px) {
+  #search-popup-panel {
+    top: 72px !important;
+    /* override inline top: 50% */
+    height: 60vh;
+    max-height: 500px;
+  }
+}
