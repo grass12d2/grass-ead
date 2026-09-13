@@ -61,46 +61,105 @@ function isValidChar(char) {
 }
 
 // ==================== POPUP THÔNG BÁO ====================
-
-// Hiển thị popup thông báo
 function showMessage(message, type = 'success') {
-    const existingPopup = document.querySelector('.message-popup');
-    if (existingPopup) {
-        existingPopup.remove();
-    }
+    // Xoá toast cũ nếu có
+    document.querySelectorAll('.message-popup').forEach(el => el.remove());
 
-    const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
+    const config = {
+        success: {
+            bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            shadow: 'rgba(16, 185, 129, 0.35)',
+            icon: 'fa-check-circle'
+        },
+        error: {
+            bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            shadow: 'rgba(239, 68, 68, 0.35)',
+            icon: 'fa-circle-exclamation'
+        },
+        warning: {
+            bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            shadow: 'rgba(245, 158, 11, 0.35)',
+            icon: 'fa-triangle-exclamation'
+        },
+        info: {
+            bg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            shadow: 'rgba(59, 130, 246, 0.35)',
+            icon: 'fa-circle-info'
+        }
     };
 
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-triangle',
-        warning: 'fa-exclamation-circle',
-        info: 'fa-info-circle'
-    };
+    const c = config[type] || config.success;
 
     const popup = document.createElement('div');
-    popup.className = `message-popup fixed top-4 right-4 z-50 ${colors[type] || colors.success} text-white px-6 py-4 rounded-lg shadow-2xl animate-slide-in`;
+    popup.className = 'message-popup';
+    popup.style.cssText = `
+    position: fixed;
+    top: calc(var(--navbar-height, 64px) + 8px);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-12px);
+    z-index: 99999;
+    width: auto;
+    max-width: min(calc(100vw - 32px), 420px);
+    background: ${c.bg};
+    color: white;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px -5px ${c.shadow}, 0 0 0 1px rgba(255,255,255,0.1) inset;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: auto;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+`;
+
+    // Mobile: dạng pill, trải rộng tối đa nhưng vẫn có margin 2 bên
+    if (window.innerWidth < 640) {
+        popup.style.borderRadius = '999px';
+        popup.style.paddingLeft = '16px';
+        popup.style.width = '80vw';
+        popup.style.maxWidth = '80vw';
+    }
     popup.innerHTML = `
-        <div class="flex items-center gap-3">
-            <i class="fas ${icons[type] || icons.success} text-xl"></i>
-            <span class="font-medium">${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+        <i class="fas ${c.icon}" style="font-size:14px;flex-shrink:0;opacity:0.95;"></i>
+        <span style="flex:1;min-width:0;word-break:break-word;">${message}</span>
+        <button type="button" class="message-popup-close"
+            style="flex-shrink:0;background:transparent;border:0;color:rgba(255,255,255,0.75);cursor:pointer;padding:2px 4px;border-radius:6px;line-height:1;font-size:12px;"
+            aria-label="Đóng">
+            <i class="fas fa-times"></i>
+        </button>
     `;
+
     document.body.appendChild(popup);
 
-    setTimeout(() => {
-        if (popup.parentElement) {
-            popup.remove();
-        }
-    }, 3000);
+    // Animate in
+    requestAnimationFrame(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    // Nút đóng
+    const closeBtn = popup.querySelector('.message-popup-close');
+    closeBtn.addEventListener('click', () => hidePopup(popup));
+
+    // Tự động ẩn sau 3s
+    const autoHide = setTimeout(() => hidePopup(popup), 3000);
+    popup._autoHideTimer = autoHide;
+}
+
+function hidePopup(popup) {
+    if (!popup || !popup.parentElement) return;
+    if (popup._autoHideTimer) clearTimeout(popup._autoHideTimer);
+
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateX(-50%) translateY(-12px)';
+    setTimeout(() => popup.remove(), 250);
 }
 
 // ==================== XỬ LÝ INPUT ====================
@@ -238,6 +297,32 @@ function clearText(textarea) {
     }
 }
 
+// ==================== HANDLE INPUT CÓ GIỮ CURSOR ====================
+/**
+ * Xử lý input, chuyển uppercase, lọc ký tự không hợp lệ,
+ * GIỮ NGUYÊN vị trí con trỏ nhập liệu.
+ */
+function handleTextInputWithCursor(textarea, showAlert = true) {
+    if (!textarea) return '';
+
+    const originalText = textarea.value;
+    const cursorPos = textarea.selectionStart;
+
+    const processed = handleTextInput(originalText, showAlert);
+
+    if (processed !== originalText) {
+        // Tính vị trí cursor mới = độ dài của phần đã xử lý trước cursor
+        const beforeCursor = originalText.slice(0, cursorPos);
+        const processedBefore = handleTextInput(beforeCursor, false);
+        const newCursorPos = Math.min(processedBefore.length, processed.length);
+
+        textarea.value = processed;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }
+
+    return processed;
+}
+
 // ==================== EXPORT ====================
 
 window.GrassEAD = {
@@ -253,6 +338,7 @@ window.GrassEAD = {
     isValidChar,
     showMessage,
     handleTextInput,
+    handleTextInputWithCursor,
     copyText,
     pasteText,
     clearText

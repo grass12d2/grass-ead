@@ -1,44 +1,159 @@
-// ==================== CARDANO GRILLE (Решетка Кардано) ====================
+// ==================== CARDANO GRILLE RECT (Решетка Кардано — прямоугольная) ====================
 
 const CARDANO_LETTERS = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+const PAD_CHAR = '–';
+
+// Template mặc định cho lưới 6×10 (15 lỗ cố định)
+const DEFAULT_TEMPLATE_6X10 = [
+    [0, 1], [1, 0], [1, 4], [1, 6], [1, 7],
+    [2, 1], [2, 5], [2, 9], [3, 3], [3, 7],
+    [4, 1], [5, 2], [5, 5], [5, 6], [5, 9]
+];
+
+// Màu theo vị trí: 0=Gốc(emerald), 1=Đảo 180°(violet), 2=Lật dọc(rose), 3=Lật ngang(amber)
 const CARDANO_ROT_COLORS = [
-    'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'
+    'bg-emerald-600',
+    'bg-violet-500',
+    'bg-rose-500',
+    'bg-amber-500'
 ];
 const CARDANO_ROT_BG = [
-    'bg-blue-100 dark:bg-blue-900/40',
     'bg-emerald-100 dark:bg-emerald-900/40',
-    'bg-amber-100 dark:bg-amber-900/40',
-    'bg-rose-100 dark:bg-rose-900/40'
+    'bg-violet-100 dark:bg-violet-900/40',
+    'bg-rose-100 dark:bg-rose-900/40',
+    'bg-amber-100 dark:bg-amber-900/40'
 ];
-const CARDANO_ROT_NAMES = ['0°', '90°', '180°', '270°'];
+
+// Tên đầy đủ (dùng cho legend, editor, status)
+const CARDANO_ROT_NAMES = [
+    'Gốc',
+    'Đảo 180°',
+    'Lật dọc',
+    'Lật ngang'
+];
+
+// Label dài cho status message
+const POSITION_LABELS = [
+    'Gốc',
+    'Đảo 180°',
+    'Lật dọc',
+    'Lật ngang'
+];
+
+// Text thuần cho badge (trên bảng animation)
+const POSITION_BADGE = [
+    'Gốc',
+    '180°',
+    'Lật dọc',
+    'Lật ngang'
+];
+
+// HTML có icon Font Awesome cho progress step label
+const POSITION_ANGLE_HTML = [
+    'Gốc',
+    '180°',
+    '<i class="fas fa-arrows-up-down"></i>',
+    '<i class="fas fa-arrows-left-right"></i>'
+];
+
+// 24 hoán vị của [0, 1, 2, 3]
+const ALL_ORDERS = (function () {
+    const result = [];
+    function permute(arr, m = []) {
+        if (arr.length === 0) result.push(m);
+        else {
+            for (let i = 0; i < arr.length; i++) {
+                const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+                permute(rest, m.concat([arr[i]]));
+            }
+        }
+    }
+    permute([0, 1, 2, 3]);
+    return result;
+})();
+
+function findOrderIndex(perm) {
+    return ALL_ORDERS.findIndex(arr =>
+        arr.length === perm.length && arr.every((v, i) => v === perm[i])
+    );
+}
+
+// Mặc định: vị trí 1 → 2 → 3 → 4 (mới) = [0, 1, 2, 3]
+const DEFAULT_ORDER = [0, 1, 2, 3];
+const DEFAULT_ORDER_INDEX = findOrderIndex(DEFAULT_ORDER);
+let currentOrderIndex = DEFAULT_ORDER_INDEX;
 
 let cardanoTemplate = null;
-let cardanoGridSize = 6;
+let cardanoGridRows = 6;
+let cardanoGridCols = 10;
 let currentModeGlobal = 'encrypt';
 let currentCardanoResult = null;
 
+// ---------- ORDER ----------
+
+function getCurrentOrder() {
+    return ALL_ORDERS[currentOrderIndex];
+}
+
+function getPositionForStep(stepIdx) {
+    return getCurrentOrder()[stepIdx];
+}
+
+function grilleTransformForStep(stepIdx) {
+    return grilleTransform(getPositionForStep(stepIdx));
+}
+
 // ---------- TEMPLATE ----------
 
-function generateRandomTemplate(n) {
-    const template = Array.from({ length: n }, () => Array(n).fill(false));
-    const assigned = Array.from({ length: n }, () => Array(n).fill(false));
+// Ánh xạ (r, c) của tờ giấy → ô template gốc dưới vị trí `pos`
+// pos: 0=Gốc, 1=Đảo 180°, 2=Lật dọc, 3=Lật ngang
+function templateCellAt(r, c, pos, rows, cols) {
+    switch (pos) {
+        case 0: return [r, c];                              // Gốc
+        case 1: return [rows - 1 - r, cols - 1 - c];        // Đảo 180°
+        case 2: return [rows - 1 - r, c];                   // Lật dọc
+        case 3: return [r, cols - 1 - c];                   // Lật ngang
+        default: return [r, c];
+    }
+}
 
-    for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
+function generateFixedTemplate6x10() {
+    const rows = 6, cols = 10;
+    const template = Array.from({ length: rows }, () => Array(cols).fill(false));
+    for (const [r, c] of DEFAULT_TEMPLATE_6X10) {
+        template[r][c] = true;
+    }
+    return template;
+}
+
+// Random force — bỏ qua quy tắc template cố định cho 6×10
+function generateRandomTemplateForce(rows, cols) {
+    const template = Array.from({ length: rows }, () => Array(cols).fill(false));
+    const assigned = Array.from({ length: rows }, () => Array(cols).fill(false));
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
             if (assigned[r][c]) continue;
-            const orbit = [];
-            let cr = r, cc = c;
-            for (let k = 0; k < 4; k++) {
-                orbit.push([cr, cc]);
-                assigned[cr][cc] = true;
-                const nr = cc, nc = n - 1 - cr;
-                cr = nr; cc = nc;
-            }
+            const orbit = [
+                [r, c],
+                [rows - 1 - r, cols - 1 - c],
+                [rows - 1 - r, c],
+                [r, cols - 1 - c]
+            ];
+            for (const [or_, oc] of orbit) assigned[or_][oc] = true;
             const [hr, hc] = orbit[Math.floor(Math.random() * 4)];
             template[hr][hc] = true;
         }
     }
     return template;
+}
+
+// Wrapper — 6×10 luôn dùng template cố định, các lưới khác random
+function generateRandomTemplate(rows, cols) {
+    if (rows === 6 && cols === 10) {
+        return generateFixedTemplate6x10();
+    }
+    return generateRandomTemplateForce(rows, cols);
 }
 
 function countHoles(template) {
@@ -47,57 +162,69 @@ function countHoles(template) {
     return count;
 }
 
-function templateCellAt(r, c, rot, n) {
-    switch (rot) {
-        case 0: return [r, c];
-        case 1: return [n - 1 - c, r];
-        case 2: return [n - 1 - r, n - 1 - c];
-        case 3: return [c, n - 1 - r];
-        default: return [r, c];
-    }
-}
-
-function isHoleAt(template, r, c, rot) {
-    const n = template.length;
-    const [tr, tc] = templateCellAt(r, c, rot, n);
+function isHoleAt(template, r, c, pos) {
+    const rows = template.length;
+    const cols = template[0].length;
+    const [tr, tc] = templateCellAt(r, c, pos, rows, cols);
     return template[tr][tc];
 }
 
-function rotationForCell(template, r, c) {
-    for (let k = 0; k < 4; k++) {
-        if (isHoleAt(template, r, c, k)) return k;
+function turnForCell(template, r, c) {
+    for (let pos = 0; pos < 4; pos++) {
+        if (isHoleAt(template, r, c, pos)) return pos;
     }
     return -1;
 }
 
-// ---------- ENCRYPT / DECRYPT ----------
-
-function randomCardanoLetter() {
-    return CARDANO_LETTERS[Math.floor(Math.random() * CARDANO_LETTERS.length)];
+// CSS transform 3D — hiệu ứng lật thật
+function grilleTransform(pos) {
+    const pers = 'perspective(1200px)';
+    switch (pos) {
+        case 0: return `${pers} rotateY(0deg) rotateX(0deg)`;       // Gốc
+        case 1: return `${pers} rotateY(180deg) rotateX(180deg)`;   // Đảo 180°
+        case 2: return `${pers} rotateY(0deg) rotateX(180deg)`;     // Lật dọc
+        case 3: return `${pers} rotateY(180deg) rotateX(0deg)`;     // Lật ngang
+        default: return `${pers} rotateY(0deg) rotateX(0deg)`;
+    }
 }
 
+// ---------- ENCRYPT / DECRYPT ----------
+
 function prepareCardanoInput(text) {
-    return text.toUpperCase().replace(/Ё/g, 'Е').replace(/[^А-Я]/g, '');
+    let result = '';
+    for (const char of text.toUpperCase()) {
+        if (char === 'Ё') {
+            result += 'Е';
+        } else if (char === '–' || char === '-' || char === '—') {
+            result += PAD_CHAR;
+        } else if (GrassEAD.RUSSIAN_ALPHABET.includes(char)) {
+            result += char;
+        }
+    }
+    return result;
 }
 
 function cardanoEncrypt(text, template) {
-    const n = template.length;
-    const capacity = n * n;
+    const rows = template.length;
+    const cols = template[0].length;
+    const capacity = rows * cols;
     let clean = prepareCardanoInput(text);
     if (clean.length > capacity) clean = clean.slice(0, capacity);
 
-    const grid = Array.from({ length: n }, () => Array(n).fill(''));
-    const padFlags = Array.from({ length: n }, () => Array(n).fill(false));
+    const grid = Array.from({ length: rows }, () => Array(cols).fill(''));
+    const padFlags = Array.from({ length: rows }, () => Array(cols).fill(false));
 
+    const order = getCurrentOrder();
     let idx = 0;
-    for (let rot = 0; rot < 4; rot++) {
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (isHoleAt(template, r, c, rot)) {
+    for (let stepIdx = 0; stepIdx < 4; stepIdx++) {
+        const pos = order[stepIdx];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (isHoleAt(template, r, c, pos)) {
                     if (idx < clean.length) {
                         grid[r][c] = clean[idx++];
                     } else {
-                        grid[r][c] = randomCardanoLetter();
+                        grid[r][c] = PAD_CHAR;
                         padFlags[r][c] = true;
                     }
                 }
@@ -113,22 +240,25 @@ function cardanoEncrypt(text, template) {
 }
 
 function cardanoDecrypt(ciphertext, template) {
-    const n = template.length;
-    const capacity = n * n;
+    const rows = template.length;
+    const cols = template[0].length;
+    const capacity = rows * cols;
     let clean = prepareCardanoInput(ciphertext);
-    if (clean.length < capacity) clean = clean.padEnd(capacity, '·');
+    if (clean.length < capacity) clean = clean.padEnd(capacity, PAD_CHAR);
     if (clean.length > capacity) clean = clean.slice(0, capacity);
 
     const grid = [];
-    for (let r = 0; r < n; r++) {
-        grid.push(clean.slice(r * n, (r + 1) * n).split(''));
+    for (let r = 0; r < rows; r++) {
+        grid.push(clean.slice(r * cols, (r + 1) * cols).split(''));
     }
 
+    const order = getCurrentOrder();
     let plaintext = '';
-    for (let rot = 0; rot < 4; rot++) {
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (isHoleAt(template, r, c, rot)) {
+    for (let stepIdx = 0; stepIdx < 4; stepIdx++) {
+        const pos = order[stepIdx];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (isHoleAt(template, r, c, pos)) {
                     plaintext += grid[r][c];
                 }
             }
@@ -140,59 +270,67 @@ function cardanoDecrypt(ciphertext, template) {
 
 // ---------- RENDER TEMPLATE ----------
 
+function getCellConfig(rows, cols) {
+    const key = `${rows}x${cols}`;
+    const configs = {
+        '4x6': { cell: 78, fontSize: 32, headFont: 15, rowLabelW: 40 },
+        '6x8': { cell: 62, fontSize: 24, headFont: 13, rowLabelW: 34 },
+        '6x10': { cell: 52, fontSize: 20, headFont: 12, rowLabelW: 28 }
+    };
+    return configs[key] || { cell: 52, fontSize: 20, headFont: 12, rowLabelW: 28 };
+}
+
 function renderCardanoTemplate() {
     const container = document.getElementById('cardano-template');
     if (!container || !cardanoTemplate) return;
 
-    const n = cardanoTemplate.length;
+    const rows = cardanoTemplate.length;
+    const cols = cardanoTemplate[0].length;
     const holes = countHoles(cardanoTemplate);
     const result = currentCardanoResult;
     const isEncrypt = currentModeGlobal === 'encrypt';
 
-    const CELL_SIZE = { 4: 72, 6: 58, 8: 46, 10: 38 };
-    const FONT_SIZE = { 4: 28, 6: 22, 8: 17, 10: 13 };
-    const HEAD_FONT = { 4: 14, 6: 13, 8: 12, 10: 10 };
-    const ROW_LABEL_W = { 4: 40, 6: 34, 8: 28, 10: 24 };
-    const cellSize = CELL_SIZE[n] || 46;
-    const fontSize = FONT_SIZE[n] || 16;
-    const headFont = HEAD_FONT[n] || 12;
-    const rowLabelW = ROW_LABEL_W[n] || 30;
+    const cfg = getCellConfig(rows, cols);
 
     let html = `<div class="overflow-x-auto pb-2">
         <table class="table-encrypt mx-auto" style="table-layout: fixed; width: auto;">
             <thead><tr>
-                <th class="bg-violet-100 dark:bg-violet-900/30 text-center"
-                    style="width:${rowLabelW}px;font-size:${headFont}px;"></th>`;
-    for (let c = 1; c <= n; c++) {
-        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center"
-            style="width:${cellSize}px;font-size:${headFont}px;">${c}</th>`;
+                <th class="bg-emerald-100 dark:bg-emerald-900/30 text-center"
+                    style="width:${cfg.rowLabelW}px;font-size:${cfg.headFont}px;"></th>`;
+    for (let c = 1; c <= cols; c++) {
+        html += `<th class="bg-emerald-100 dark:bg-emerald-900/30 text-center"
+            style="width:${cfg.cell}px;font-size:${cfg.headFont}px;">${c}</th>`;
     }
     html += `</tr></thead><tbody>`;
 
-    for (let r = 0; r < n; r++) {
+    for (let r = 0; r < rows; r++) {
         html += `<tr>
-            <td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center"
-                style="width:${rowLabelW}px;font-size:${headFont}px;padding:2px;">${r + 1}</td>`;
+            <td class="font-bold bg-emerald-100 dark:bg-emerald-900/30 text-center"
+                style="width:${cfg.rowLabelW}px;font-size:${cfg.headFont}px;padding:2px;">${r + 1}</td>`;
 
-        for (let c = 0; c < n; c++) {
-            const rot = rotationForCell(cardanoTemplate, r, c);
+        for (let c = 0; c < cols; c++) {
+            const pos = turnForCell(cardanoTemplate, r, c);
             const ch = result ? (result.grid[r][c] || '') : '';
             const isPad = result && result.padFlags && result.padFlags[r][c];
-            const bg = rot >= 0 ? CARDANO_ROT_BG[rot] : 'bg-gray-100 dark:bg-gray-700/30';
+            const bg = pos >= 0 ? CARDANO_ROT_BG[pos] : 'bg-gray-100 dark:bg-gray-700/30';
 
             let content, contentCls = 'font-bold font-mono';
             if (ch) {
                 content = ch;
-                contentCls += isPad
-                    ? ' text-gray-400 dark:text-gray-500 italic'
-                    : (isEncrypt ? ' text-violet-700 dark:text-violet-300' : ' text-gray-900 dark:text-white');
+                if (isPad) {
+                    contentCls += ' text-gray-400 dark:text-gray-500';
+                } else {
+                    contentCls += isEncrypt
+                        ? ' text-emerald-800 dark:text-emerald-300'
+                        : ' text-gray-900 dark:text-white';
+                }
             } else {
                 content = `<span class="font-mono text-gray-500 dark:text-gray-400"
-                    style="font-size:${headFont}px;">${rot >= 0 ? rot : ''}</span>`;
+                    style="font-size:${cfg.headFont}px;">${pos >= 0 ? pos : ''}</span>`;
             }
 
             html += `<td class="${bg} text-center ${contentCls}"
-                style="width:${cellSize}px;height:${cellSize}px;font-size:${fontSize}px;padding:4px;">${content}</td>`;
+                style="width:${cfg.cell}px;height:${cfg.cell}px;font-size:${cfg.fontSize}px;padding:4px;">${content}</td>`;
         }
         html += `</tr>`;
     }
@@ -203,16 +341,16 @@ function renderCardanoTemplate() {
             ${[0, 1, 2, 3].map(k => `
                 <span class="flex items-center gap-1.5">
                     <span class="inline-block w-3 h-3 rounded ${CARDANO_ROT_COLORS[k]}"></span>
-                    Lượt ${k + 1} — ${CARDANO_ROT_NAMES[k]}
+                    ${CARDANO_ROT_NAMES[k]}
                 </span>
             `).join('')}
             <span class="text-gray-300 dark:text-gray-600">|</span>
-            <span>${n}×${n} = ${n * n} ô · ${holes} lỗ × 4 lượt</span>
+            <span>${rows}×${cols} = ${rows * cols} ô · ${holes} lỗ × 4 vị trí</span>
         </div>
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
             <i class="fas fa-info-circle mr-1"></i>
-            Ô có màu = lỗ khoét của lượt xoay tương ứng. Trong bảng: chữ = ký tự đã ghi; số = lượt xoay điền vào ô.
-            ${isEncrypt ? 'Ký tự <span class="italic text-gray-400">nghiêng xám</span> là đệm ngẫu nhiên.' : ''}
+            Ô có màu = lỗ khoét của vị trí tương ứng. Trong bảng: chữ = ký tự đã ghi; số = vị trí điền vào ô.
+            Ký tự <strong>–</strong> (xám) là ô đệm trống.
         </p>
     `;
 
@@ -226,7 +364,7 @@ function updateCardanoOutput() {
     const output = document.getElementById('cardano-output');
     if (!input || !output) return;
 
-    if (!cardanoTemplate) cardanoTemplate = generateRandomTemplate(cardanoGridSize);
+    if (!cardanoTemplate) cardanoTemplate = generateRandomTemplate(cardanoGridRows, cardanoGridCols);
 
     const text = input.value;
     if (!text || text.trim() === '') {
@@ -249,7 +387,11 @@ function updateCardanoOutput() {
 }
 
 function regenerateCardanoTemplate() {
-    cardanoTemplate = generateRandomTemplate(cardanoGridSize);
+    if (cardanoGridRows === 6 && cardanoGridCols === 10) {
+        cardanoTemplate = generateRandomTemplateForce(cardanoGridRows, cardanoGridCols);
+    } else {
+        cardanoTemplate = generateRandomTemplate(cardanoGridRows, cardanoGridCols);
+    }
     updateCardanoOutput();
 }
 
@@ -265,8 +407,8 @@ function updateCardanoUI() {
     if (outputLabel) outputLabel.textContent = isEncrypt ? 'Văn bản mã hoá' : 'Văn bản gốc';
     if (input) {
         input.placeholder = isEncrypt
-            ? 'Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)'
-            : 'Nhập văn bản đã mã hoá';
+            ? "Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ). Chấp nhận cả '-' và '–'."
+            : "Nhập văn bản đã mã hoá (chấp nhận '-' và '–')";
     }
 
     if (modeEncrypt && modeDecrypt) {
@@ -278,6 +420,127 @@ function updateCardanoUI() {
             modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-red-400 text-red-500 dark:text-red-400 rounded-lg text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20';
         }
     }
+}
+
+// ---------- ORDER UI ----------
+
+function updateOrderUI() {
+    const idxEl = document.getElementById('order-index');
+    const visualEl = document.getElementById('order-visual');
+
+    if (idxEl) idxEl.textContent = currentOrderIndex + 1;
+
+    // Progress step labels — dùng innerHTML để render icon Font Awesome
+    document.querySelectorAll('[data-pos-label]').forEach((el, i) => {
+        const pos = getPositionForStep(i);
+        el.innerHTML = POSITION_ANGLE_HTML[pos];
+    });
+
+    if (!visualEl) return;
+
+    const order = getCurrentOrder();
+    const colors = ['bg-emerald-600', 'bg-violet-500', 'bg-rose-500', 'bg-amber-500'];
+    const icons = [
+        'G',
+        '180',
+        '<i class="fas fa-arrows-up-down"></i>',
+        '<i class="fas fa-arrows-left-right"></i>'
+    ];
+
+    visualEl.innerHTML = order.map((pos, i) => `
+        <div class="flex items-center">
+            <div class="w-8 h-8 rounded-lg ${colors[pos]} flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                ${icons[pos]}
+            </div>
+            ${i < 3 ? '<i class="fas fa-arrow-right text-[10px] text-gray-400 mx-1"></i>' : ''}
+        </div>
+    `).join('');
+}
+
+function setOrderIndex(idx) {
+    const total = ALL_ORDERS.length;
+    currentOrderIndex = ((idx % total) + total) % total;
+
+    try {
+        localStorage.setItem('cardano-rect-order', String(currentOrderIndex));
+    } catch (e) { }
+
+    updateOrderUI();
+    updateCardanoOutput();
+    resetCardanoAnimation();
+}
+
+function loadOrderIndex() {
+    try {
+        const ORDER_STORAGE_VERSION = 'v4';
+        const storedVer = localStorage.getItem('cardano-rect-order-version');
+
+        if (storedVer !== ORDER_STORAGE_VERSION) {
+            currentOrderIndex = DEFAULT_ORDER_INDEX;
+            localStorage.setItem('cardano-rect-order-version', ORDER_STORAGE_VERSION);
+            localStorage.setItem('cardano-rect-order', String(currentOrderIndex));
+            return;
+        }
+
+        const saved = localStorage.getItem('cardano-rect-order');
+        if (saved !== null) {
+            const idx = parseInt(saved);
+            if (!isNaN(idx) && idx >= 0 && idx < ALL_ORDERS.length) {
+                currentOrderIndex = idx;
+            }
+        }
+    } catch (e) { }
+}
+
+// ---------- INPUT HANDLER ----------
+
+function processCardanoRectInput(text) {
+    let result = '';
+    const invalidChars = new Set();
+
+    for (const char of text) {
+        if (char === ' ' || char === '\n' || char === '\t') {
+            result += char;
+        } else if (char === '–' || char === '-' || char === '—') {
+            result += PAD_CHAR;
+        } else {
+            const upper = char.toUpperCase();
+            if (upper === 'Ё') {
+                result += 'Е';
+            } else if (GrassEAD.RUSSIAN_ALPHABET.includes(upper)) {
+                result += upper;
+            } else {
+                invalidChars.add(char);
+            }
+        }
+    }
+    return { text: result, invalidChars };
+}
+
+function handleCardanoRectInputWithCursor(textarea, showAlert = true) {
+    const original = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    const { text: processed, invalidChars } = processCardanoRectInput(original);
+
+    // Hiện toast cảnh báo nếu có ký tự không hợp lệ
+    if (showAlert && invalidChars.size > 0) {
+        const list = [...invalidChars].slice(0, 5).join(', ');
+        const more = invalidChars.size > 5 ? '...' : '';
+        GrassEAD.showMessage(
+            `Ký tự không hợp lệ đã bị loại bỏ: ${list}${more}. Chỉ chấp nhận А-Я, dấu cách, và '-'.`,
+            'error'
+        );
+    }
+
+    if (processed === original) return processed;
+
+    const beforeCursor = original.slice(0, cursorPos);
+    const processedBefore = processCardanoRectInput(beforeCursor).text;
+    const newCursorPos = Math.min(processedBefore.length, processed.length);
+
+    textarea.value = processed;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    return processed;
 }
 
 // ---------- INIT ----------
@@ -296,18 +559,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const animPlayBtn = document.getElementById('anim-play');
     const animResetBtn = document.getElementById('anim-reset');
 
-    cardanoTemplate = generateRandomTemplate(cardanoGridSize);
+    loadOrderIndex();
+    cardanoTemplate = generateRandomTemplate(cardanoGridRows, cardanoGridCols);
     updateCardanoUI();
+    updateOrderUI();
     renderCardanoTemplate();
 
     if (input) {
         input.addEventListener('input', function () {
-            GrassEAD.handleTextInputWithCursor(this, true);
+            handleCardanoRectInputWithCursor(this);
             updateCardanoOutput();
         });
         input.addEventListener('paste', function () {
             setTimeout(() => {
-                GrassEAD.handleTextInputWithCursor(this, true);
+                handleCardanoRectInputWithCursor(this);
                 updateCardanoOutput();
             }, 10);
         });
@@ -336,7 +601,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (gridSizeSelect) gridSizeSelect.addEventListener('change', function () {
-        cardanoGridSize = parseInt(this.value);
+        const [r, c] = this.value.split('x').map(Number);
+        cardanoGridRows = r;
+        cardanoGridCols = c;
         if (input) input.value = '';
         if (output) output.value = '';
         currentCardanoResult = null;
@@ -351,7 +618,15 @@ document.addEventListener('DOMContentLoaded', function () {
         resetCardanoAnimation();
     });
 
-    if (pasteBtn) pasteBtn.addEventListener('click', (e) => { e.preventDefault(); GrassEAD.pasteText(input); });
+    if (pasteBtn) pasteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        GrassEAD.pasteText(input).then(() => {
+            if (input) {
+                handleCardanoRectInputWithCursor(input);
+                updateCardanoOutput();
+            }
+        });
+    });
     if (copyInputBtn) copyInputBtn.addEventListener('click', (e) => { e.preventDefault(); GrassEAD.copyText(input.value); });
     if (copyOutputBtn) copyOutputBtn.addEventListener('click', (e) => { e.preventDefault(); GrassEAD.copyText(output.value); });
     if (clearBtn) clearBtn.addEventListener('click', function (e) {
@@ -363,6 +638,25 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCardanoOutput();
         resetCardanoAnimation();
     });
+
+    // Order buttons
+    const orderPrevBtn = document.getElementById('order-prev');
+    const orderNextBtn = document.getElementById('order-next');
+    const orderResetBtn = document.getElementById('order-reset');
+
+    if (orderPrevBtn) orderPrevBtn.addEventListener('click', () => setOrderIndex(currentOrderIndex - 1));
+    if (orderNextBtn) orderNextBtn.addEventListener('click', () => setOrderIndex(currentOrderIndex + 1));
+    if (orderResetBtn) orderResetBtn.addEventListener('click', () => {
+        setOrderIndex(DEFAULT_ORDER_INDEX);
+        if (cardanoGridRows === 6 && cardanoGridCols === 10) {
+            cardanoTemplate = generateFixedTemplate6x10();
+            updateCardanoOutput();
+            resetCardanoAnimation();
+        }
+        GrassEAD.showMessage('Đã về template & thứ tự mặc định!', 'info');
+    });
+
+    // Animation controls
     const animPrevBtn = document.getElementById('anim-prev');
     const animNextBtn = document.getElementById('anim-next');
     const customTemplateBtn = document.getElementById('custom-template');
@@ -385,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function () {
     resetCardanoAnimation();
 });
 
-// ==================== CARDANO ANIMATION ====================
+// ==================== ANIMATION ====================
 
 let animTimers = [];
 let animPlaying = false;
@@ -405,76 +699,73 @@ function clearAnimTimers() {
     animTimers = [];
 }
 
-// Chuẩn bị data animation cho MÃ HOÁ
 function prepareAnimOrder(plaintext) {
-    const n = cardanoTemplate.length;
+    const rows = cardanoTemplate.length;
+    const cols = cardanoTemplate[0].length;
+    const capacity = rows * cols;
     let clean = prepareCardanoInput(plaintext);
-    if (clean.length > n * n) clean = clean.slice(0, n * n);
-
-    const order = [];
-    let idx = 0;
-    for (let rot = 0; rot < 4; rot++) {
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (isHoleAt(cardanoTemplate, r, c, rot)) {
-                    const isPad = idx >= clean.length;
-                    const ch = isPad ? randomCardanoLetter() : clean[idx++];
-                    order.push({ r, c, ch, rot, isPad });
-                }
-            }
-        }
-    }
-    return order;
-}
-
-// Chuẩn bị data animation cho GIẢI MÃ
-// - Grid = bản mã đã điền đầy
-// - Order = thứ tự đọc 4 lượt (chính là bản rõ)
-function prepareDecryptAnimOrder(ciphertext) {
-    const n = cardanoTemplate.length;
-    const capacity = n * n;
-    let clean = prepareCardanoInput(ciphertext);
-    if (clean.length < capacity) clean = clean.padEnd(capacity, '·');
     if (clean.length > capacity) clean = clean.slice(0, capacity);
 
-    // Bản mã đọc theo hàng để tạo grid đầy
-    const grid = [];
-    for (let r = 0; r < n; r++) {
-        grid.push(clean.slice(r * n, (r + 1) * n).split(''));
-    }
-
-    // Order: duyệt 4 lượt xoay, tại mỗi lỗ khoét thì đọc grid[r][c]
-    const order = [];
-    for (let rot = 0; rot < 4; rot++) {
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (isHoleAt(cardanoTemplate, r, c, rot)) {
-                    order.push({
-                        r, c,
-                        ch: grid[r][c],
-                        rot,
-                        isPad: false
-                    });
+    const order = getCurrentOrder();
+    const animOrder = [];
+    let idx = 0;
+    for (let stepIdx = 0; stepIdx < 4; stepIdx++) {
+        const pos = order[stepIdx];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (isHoleAt(cardanoTemplate, r, c, pos)) {
+                    const isPad = idx >= clean.length;
+                    const ch = isPad ? PAD_CHAR : clean[idx++];
+                    animOrder.push({ r, c, ch, rot: stepIdx, position: pos, isPad });
                 }
             }
         }
     }
-    return { grid, order };
+    return animOrder;
+}
+
+function prepareDecryptAnimOrder(ciphertext) {
+    const rows = cardanoTemplate.length;
+    const cols = cardanoTemplate[0].length;
+    const capacity = rows * cols;
+    let clean = prepareCardanoInput(ciphertext);
+    if (clean.length < capacity) clean = clean.padEnd(capacity, PAD_CHAR);
+    if (clean.length > capacity) clean = clean.slice(0, capacity);
+
+    const grid = [];
+    for (let r = 0; r < rows; r++) {
+        grid.push(clean.slice(r * cols, (r + 1) * cols).split(''));
+    }
+
+    const order = getCurrentOrder();
+    const animOrder = [];
+    for (let stepIdx = 0; stepIdx < 4; stepIdx++) {
+        const pos = order[stepIdx];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (isHoleAt(cardanoTemplate, r, c, pos)) {
+                    animOrder.push({ r, c, ch: grid[r][c], rot: stepIdx, position: pos, isPad: false });
+                }
+            }
+        }
+    }
+    return { grid, order: animOrder };
 }
 
 function renderAnimStage() {
     const container = document.getElementById('anim-stage');
     if (!container || !cardanoTemplate) return;
 
-    const n = cardanoTemplate.length;
+    const rows = cardanoTemplate.length;
+    const cols = cardanoTemplate[0].length;
     const isDecrypt = currentModeGlobal === 'decrypt';
 
-    const ANIM_FONT = { 4: 28, 6: 22, 8: 17, 10: 13 };
-    const cellFont = ANIM_FONT[n] || 16;
+    const cfg = getCellConfig(rows, cols);
+    const cellFont = cfg.fontSize;
 
     let cellsHtml = '';
-    for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
             let content = '';
             let extraCls = '';
             if (isDecrypt && animCipherGrid) {
@@ -487,15 +778,22 @@ function renderAnimStage() {
     }
 
     let grilleHtml = '';
-    for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
             const isHole = cardanoTemplate[r][c];
             const style = isHole
-                ? `grid-row:${r + 1};grid-column:${c + 1};background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 0 0 2px rgba(76,29,149,0.25);`
-                : `grid-row:${r + 1};grid-column:${c + 1};background:rgba(76,29,149,0.85);`;
+                ? `grid-row:${r + 1};grid-column:${c + 1};background:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 0 0 2px rgba(5,150,105,0.35);`
+                : `grid-row:${r + 1};grid-column:${c + 1};background:rgba(5,150,105,0.85);`;
             grilleHtml += `<div style="${style}"></div>`;
         }
     }
+
+    const aspect = cols / rows;
+    const maxWidth = Math.min(560, cols * 52);
+
+    // ── Góc đánh dấu vàng — đặt ở TOP-RIGHT của board gốc ──
+    // Kích thước: 1.5 cell (nhưng không quá 16% chiều rộng board)
+    const markerSize = `calc(100% / ${cols} * 3)`;
 
     container.innerHTML = `
         <div class="flex flex-col items-center">
@@ -504,32 +802,46 @@ function renderAnimStage() {
                 min-width:clamp(64px, 18vw, 110px);text-align:center;
                 padding:clamp(4px, 1.2vw, 8px) clamp(12px, 4vw, 24px);
                 border-radius:clamp(8px, 2.5vw, 14px);
-                font-size:clamp(14px, 4.5vw, 22px);font-weight:800;
-                background:linear-gradient(135deg, rgba(139,92,246,0.95), rgba(76,29,149,0.95));
+                font-size:clamp(14px, 4.5vw, 20px);font-weight:800;
+                background:linear-gradient(135deg, rgba(5,150,105,0.95), rgba(4,120,87,0.95));
                 color:#fff;font-family:ui-monospace,monospace;
                 transition:opacity 0.35s, transform 0.35s;
                 opacity:0;pointer-events:none;
-                box-shadow:0 10px 30px rgba(139,92,246,0.35);
-                letter-spacing:0.05em;">0°</div>
+                box-shadow:0 10px 30px rgba(5,150,105,0.4);
+                letter-spacing:0.05em;">Gốc</div>
             </div>
-            <div class="cardano-anim-board" style="position:relative;width:100%;max-width:400px;aspect-ratio:1/1;
+            <div class="cardano-anim-board" style="position:relative;width:100%;max-width:${maxWidth}px;aspect-ratio:${aspect};
                 background:#ffffff;border-radius:14px;overflow:hidden;
-                box-shadow:0 20px 45px -15px rgba(76,29,149,0.35), 0 0 0 1px rgba(76,29,149,0.12);">
+                box-shadow:0 20px 45px -15px rgba(5,150,105,0.35), 0 0 0 1px rgba(5,150,105,0.12);
+                perspective:1200px;">
                 <div style="position:absolute;inset:0;display:grid;
-                    grid-template-columns:repeat(${n},1fr);grid-template-rows:repeat(${n},1fr);">
+                    grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);">
                     ${cellsHtml}
                 </div>
                 <div id="anim-grille" class="cardano-anim-grille" style="position:absolute;inset:0;
-                    display:grid;grid-template-columns:repeat(${n},1fr);grid-template-rows:repeat(${n},1fr);
-                    transform:rotate(0deg);transform-origin:center center;pointer-events:none;opacity:0;">
+                    display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);
+                    transform:${grilleTransform(0)};pointer-events:none;opacity:0;">
+
+                    <!-- Góc đánh dấu vàng — nằm trong grille, xoay cùng grille -->
+                    <div id="anim-marker" style="
+                        grid-row:1;grid-column:${cols};
+                        justify-self:end;align-self:start;
+                        width:${markerSize};height:${markerSize};
+                        background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                        border-top-right-radius:12px;
+                        border-bottom-left-radius:100%;
+                        box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4), 0 2px 6px rgba(245,158,11,0.5);
+                        z-index:10;
+                        pointer-events:none;
+                        transition:opacity 0.3s ease;
+                    "></div>
+
                     ${grilleHtml}
                 </div>
             </div>
         </div>
     `;
 }
-
-// ===== Progress step helpers =====
 
 function activateStep(step) {
     document.querySelectorAll('.anim-step').forEach(el => {
@@ -555,14 +867,12 @@ function resetAnimSteps() {
     document.querySelectorAll('.anim-step').forEach(el => el.classList.remove('active', 'done'));
 }
 
-// ===== Badge =====
-
 function showBadge(text) {
     const badge = document.getElementById('anim-badge');
     if (!badge) return;
     badge.innerHTML = text;
-    badge.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.95), rgba(76,29,149,0.95))';
-    badge.style.boxShadow = '0 10px 30px rgba(139,92,246,0.35)';
+    badge.style.background = 'linear-gradient(135deg, rgba(5,150,105,0.95), rgba(4,120,87,0.95))';
+    badge.style.boxShadow = '0 10px 30px rgba(5,150,105,0.4)';
     badge.style.opacity = '1';
     badge.style.transform = 'scale(1)';
 }
@@ -570,9 +880,9 @@ function showBadge(text) {
 function showBadgeDone() {
     const badge = document.getElementById('anim-badge');
     if (!badge) return;
-    badge.innerHTML = '<i class="fas fa-check"></i> 270°';
-    badge.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95))';
-    badge.style.boxShadow = '0 10px 30px rgba(16,185,129,0.4)';
+    badge.innerHTML = '<i class="fas fa-check"></i> Hoàn tất';
+    badge.style.background = 'linear-gradient(135deg, rgba(5,150,105,0.95), rgba(4,120,87,0.95))';
+    badge.style.boxShadow = '0 10px 30px rgba(5,150,105,0.5)';
     badge.style.opacity = '1';
     badge.style.transform = 'scale(1)';
 }
@@ -581,8 +891,6 @@ function setAnimStatus(html) {
     const el = document.getElementById('anim-status');
     if (el) el.innerHTML = html;
 }
-
-// ===== Fill & step-forward =====
 
 async function fillStepItems(step) {
     const isDecrypt = currentModeGlobal === 'decrypt';
@@ -595,12 +903,10 @@ async function fillStepItems(step) {
         if (!cell) continue;
 
         if (isDecrypt) {
-            // GIẢI MÃ: ô đã có sẵn chữ → chỉ highlight
             cell.classList.remove('cardano-anim-cell-revealed');
             void cell.offsetWidth;
             cell.classList.add('cardano-anim-cell-revealed');
         } else {
-            // MÃ HOÁ: điền ký tự + hiệu ứng rơi
             cell.classList.remove('cardano-anim-cell-filled');
             void cell.offsetWidth;
             cell.textContent = item.ch;
@@ -614,26 +920,25 @@ async function fillStepItems(step) {
 async function animateStepForward(step) {
     activateStep(step);
     const grille = document.getElementById('anim-grille');
+    const pos = getPositionForStep(step);
 
     if (step > 0) {
-        setAnimStatus(`<i class="fas fa-rotate mr-1"></i>Xoay lưới sang ${step * 90}°...`);
-        showBadge(`${step * 90}°`);
-        if (grille) grille.style.transform = `rotate(${step * 90}deg)`;
-        await animSleep(1050);
+        setAnimStatus(`<i class="fas fa-rotate mr-1"></i>Lượt ${step + 1}: ${POSITION_LABELS[pos]}...`);
+        showBadge(POSITION_BADGE[pos]);
+        if (grille) grille.style.transform = grilleTransformForStep(step);
+        await animSleep(3150);   // ← 1050ms × 3
     } else {
-        showBadge('0°');
-        await animSleep(280);
+        showBadge(POSITION_BADGE[pos]);
+        await animSleep(840);    // ← 280ms × 3
     }
 
-    setAnimStatus(`<i class="fas fa-pen mr-1"></i>Điền ký tự vào lỗ khoét — Lượt ${step + 1} (${step * 90}°)`);
+    setAnimStatus(`<i class="fas fa-pen mr-1"></i>Điền ký tự vào lỗ khoét — Lượt ${step + 1} (${POSITION_LABELS[pos]})`);
     await fillStepItems(step);
 
     markStepDone(step);
     currentAnimStep = step;
-    await animSleep(420);
+    await animSleep(1260);       // ← 420ms × 3
 }
-
-// ===== Kết thúc animation (dùng chung cho cả 2 mode) =====
 
 async function finishAnimation() {
     const grille = document.getElementById('anim-grille');
@@ -643,21 +948,15 @@ async function finishAnimation() {
         ? 'Hoàn tất 4 lượt — Đã đọc xong bản rõ...'
         : 'Hoàn tất 4 lượt — Đang đọc lưới theo hàng...';
     setAnimStatus(`<i class="fas fa-check-circle mr-1 text-emerald-500"></i>${msg}`);
-    await animSleep(500);
+    await animSleep(1500);
 
     if (grille) grille.style.opacity = '0';
     showBadgeDone();
-    await animSleep(650);
+    await animSleep(1950);
 
-    showAnimResult(animOrderCache, cardanoTemplate.length);
-
-    const doneMsg = isDecrypt
-        ? 'Bản rõ đã sẵn sàng! Dùng nút bên dưới để xem lại từng lượt.'
-        : 'Bản mã đã sẵn sàng! Dùng nút bên dưới để xem lại từng lượt.';
-    setAnimStatus(`<i class="fas fa-flag-checkered mr-1 text-violet-500"></i>${doneMsg}`);
+    showAnimResult(animOrderCache);
+    setAnimStatus(`<i class="fas fa-flag-checkered mr-1 text-emerald-700 dark:text-emerald-400"></i>Kết quả đã sẵn sàng! Dùng nút bên dưới để xem lại từng lượt.`);
 }
-
-// ===== Main play =====
 
 async function playCardanoAnimation() {
     const input = document.getElementById('cardano-input');
@@ -682,7 +981,6 @@ async function playCardanoAnimation() {
     const resultEl = document.getElementById('anim-result');
     if (resultEl) { resultEl.classList.add('hidden'); resultEl.innerHTML = ''; }
 
-    // Chuẩn bị data TRƯỚC khi render stage
     if (isDecrypt) {
         const decryptData = prepareDecryptAnimOrder(text);
         animOrderCache = decryptData.order;
@@ -696,15 +994,14 @@ async function playCardanoAnimation() {
 
     const grille = document.getElementById('anim-grille');
     if (grille) {
-        grille.style.transform = 'rotate(0deg)';
+        grille.style.transform = grilleTransform(0);
         grille.style.opacity = '1';
     }
-    showBadge('0°');
-
+    showBadge('Gốc');
     currentAnimStep = -1;
 
     setAnimStatus('<i class="fas fa-hourglass-start mr-1"></i>Chuẩn bị...');
-    await animSleep(500);
+    await animSleep(1500);
 
     for (let s = 0; s < 4; s++) {
         await animateStepForward(s);
@@ -717,8 +1014,6 @@ async function playCardanoAnimation() {
     if (navEl) navEl.style.display = 'flex';
     updateNavButtons();
 }
-
-// ===== Prev / Next =====
 
 function updateNavButtons() {
     const prevBtn = document.getElementById('anim-prev');
@@ -737,7 +1032,6 @@ async function goToPrevStep() {
     const step = currentAnimStep;
     const isDecrypt = currentModeGlobal === 'decrypt';
 
-    // Xoá highlight của lượt hiện tại
     const items = animOrderCache.filter(o => o.rot === step);
     for (const item of items) {
         const cell = document.querySelector(
@@ -755,14 +1049,13 @@ async function goToPrevStep() {
     const stepEl = document.querySelector(`.anim-step[data-step="${step}"]`);
     if (stepEl) stepEl.classList.remove('active', 'done');
 
-    // Ẩn kết quả + reset badge về màu tím
     const resultEl = document.getElementById('anim-result');
     if (resultEl) { resultEl.classList.add('hidden'); resultEl.innerHTML = ''; }
 
     const badge = document.getElementById('anim-badge');
     if (badge) {
-        badge.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.95), rgba(76,29,149,0.95))';
-        badge.style.boxShadow = '0 10px 30px rgba(139,92,246,0.35)';
+        badge.style.background = 'linear-gradient(135deg, rgba(5,150,105,0.95), rgba(4,120,87,0.95))';
+        badge.style.boxShadow = '0 10px 30px rgba(5,150,105,0.4)';
     }
 
     currentAnimStep = step - 1;
@@ -771,16 +1064,16 @@ async function goToPrevStep() {
     if (grille) grille.style.opacity = '1';
 
     if (currentAnimStep >= 0) {
-        const angle = currentAnimStep * 90;
-        showBadge(`${angle}°`);
-        if (grille) grille.style.transform = `rotate(${angle}deg)`;
-        setAnimStatus(`<i class="fas fa-rotate-left mr-1"></i>Lùi về lượt ${currentAnimStep + 1} (${angle}°)`);
-        await animSleep(1050);
+        const pos = getPositionForStep(currentAnimStep);
+        showBadge(POSITION_BADGE[pos]);
+        if (grille) grille.style.transform = grilleTransformForStep(currentAnimStep);
+        setAnimStatus(`<i class="fas fa-rotate-left mr-1"></i>Lùi về lượt ${currentAnimStep + 1} (${POSITION_LABELS[pos]})`);
+        await animSleep(3150);
     } else {
-        showBadge('0°');
-        if (grille) grille.style.transform = 'rotate(0deg)';
+        showBadge('Gốc');
+        if (grille) grille.style.transform = grilleTransform(0);
         setAnimStatus('<i class="fas fa-rotate-left mr-1"></i>Đã lùi về trạng thái ban đầu');
-        await animSleep(650);
+        await animSleep(1950);
     }
 
     animPlaying = false;
@@ -800,7 +1093,6 @@ async function goToNextStep() {
 
     await animateStepForward(currentAnimStep + 1);
 
-    // Vừa chạm step 3 → chạy hiệu ứng kết thúc
     if (currentAnimStep === 3) {
         await finishAnimation();
     }
@@ -810,21 +1102,19 @@ async function goToNextStep() {
     updateNavButtons();
 }
 
-// ===== Result & reset =====
-
-function showAnimResult(order, n) {
+function showAnimResult(order) {
     const resultEl = document.getElementById('anim-result');
     if (!resultEl) return;
 
+    const rows = cardanoTemplate.length;
+    const cols = cardanoTemplate[0].length;
     const isDecrypt = currentModeGlobal === 'decrypt';
 
     let output = '';
     if (isDecrypt) {
-        // Giải mã: ghép theo thứ tự đọc trong order
         for (const item of order) output += item.ch;
     } else {
-        // Mã hoá: ghép theo grid rồi đọc hàng
-        const grid = Array.from({ length: n }, () => Array(n).fill(''));
+        const grid = Array.from({ length: rows }, () => Array(cols).fill(''));
         for (const item of order) grid[item.r][item.c] = item.ch;
         output = grid.map(row => row.join('')).join('');
     }
@@ -838,15 +1128,15 @@ function showAnimResult(order, n) {
     const pad = order.length - nonPad;
 
     const label = isDecrypt
-        ? 'Bản rõ (đọc theo 4 lượt xoay)'
+        ? 'Bản rõ (đọc theo 4 lượt)'
         : 'Bản mã (đọc theo hàng)';
     const note = isDecrypt
         ? `Đã đọc ${order.length} ký tự từ bản mã qua 4 lượt`
-        : `${nonPad} ký tự thực + ${pad} ký tự đệm ngẫu nhiên (in nghiêng trên lưới)`;
+        : `${nonPad} ký tự thực + ${pad} ký tự "–" (xám, trên lưới)`;
 
     resultEl.innerHTML = `
-        <div class="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800/50">
-            <div class="text-xs uppercase tracking-wider font-bold text-violet-600 dark:text-violet-400 mb-2">
+        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
+            <div class="text-xs uppercase tracking-wider font-bold text-emerald-800 dark:text-emerald-400 mb-2">
                 <i class="fas fa-file-lines mr-1"></i>${label}
             </div>
             <div class="flex flex-wrap gap-1 mb-3">
@@ -887,21 +1177,19 @@ function resetCardanoAnimation() {
 
 let editorSelection = new Set();
 
-function getOrbitKeys(r, c, n) {
-    const keys = [];
-    let cr = r, cc = c;
-    for (let k = 0; k < 4; k++) {
-        keys.push(`${cr},${cc}`);
-        const nr = cc, nc = n - 1 - cr;
-        cr = nr; cc = nc;
-    }
-    return keys;
+function getOrbitKeys(r, c, rows, cols) {
+    return [
+        `${r},${c}`,
+        `${rows - 1 - r},${cols - 1 - c}`,
+        `${rows - 1 - r},${c}`,
+        `${r},${cols - 1 - c}`
+    ];
 }
 
-function rotOfCellInEditor(r, c, n) {
-    for (let k = 0; k < 4; k++) {
-        const [tr, tc] = templateCellAt(r, c, k, n);
-        if (editorSelection.has(`${tr},${tc}`)) return k;
+function turnOfCellInEditor(r, c, rows, cols) {
+    for (let pos = 0; pos < 4; pos++) {
+        const [tr, tc] = templateCellAt(r, c, pos, rows, cols);
+        if (editorSelection.has(`${tr},${tc}`)) return pos;
     }
     return -1;
 }
@@ -909,49 +1197,47 @@ function rotOfCellInEditor(r, c, n) {
 function renderCustomGrid() {
     const container = document.getElementById('custom-grid');
     if (!container) return;
-    const n = cardanoGridSize;
+    const rows = cardanoGridRows;
+    const cols = cardanoGridCols;
 
     const requiredEl = document.getElementById('custom-required');
     const countEl = document.getElementById('custom-count');
-    if (requiredEl) requiredEl.textContent = n * n / 4;
+    const required = (rows * cols) / 4;
+    if (requiredEl) requiredEl.textContent = required;
     if (countEl) {
-        const required = n * n / 4;
         countEl.textContent = editorSelection.size;
-        countEl.classList.toggle('text-emerald-600', editorSelection.size === required);
+        countEl.classList.toggle('text-emerald-700', editorSelection.size === required);
         countEl.classList.toggle('dark:text-emerald-400', editorSelection.size === required);
     }
 
-    const CELL_SIZE = { 4: 64, 6: 52, 8: 42, 10: 34 };
-    const FONT_SIZE = { 4: 24, 6: 19, 8: 15, 10: 12 };
-    const HEAD_FONT = { 4: 14, 6: 13, 8: 12, 10: 10 };
-    const ROW_LABEL_W = { 4: 38, 6: 32, 8: 26, 10: 22 };
-    const cs = CELL_SIZE[n] || 42;
-    const fs = FONT_SIZE[n] || 15;
-    const hf = HEAD_FONT[n] || 12;
-    const rw = ROW_LABEL_W[n] || 28;
+    const cfg = getCellConfig(rows, cols);
+    const cs = cfg.cell - 6;
+    const fs = cfg.fontSize - 4;
+    const hf = cfg.headFont;
+    const rw = cfg.rowLabelW - 4;
 
     let html = `<div class="overflow-x-auto pb-2">
         <table class="table-encrypt mx-auto" style="table-layout: fixed; width: auto;">
             <thead><tr>
-                <th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+                <th class="bg-emerald-100 dark:bg-emerald-900/30 text-center"
                     style="width:${rw}px;font-size:${hf}px;"></th>`;
-    for (let c = 1; c <= n; c++) {
-        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+    for (let c = 1; c <= cols; c++) {
+        html += `<th class="bg-emerald-100 dark:bg-emerald-900/30 text-center"
             style="width:${cs}px;font-size:${hf}px;">${c}</th>`;
     }
     html += `</tr></thead><tbody>`;
 
-    for (let r = 0; r < n; r++) {
+    for (let r = 0; r < rows; r++) {
         html += `<tr>
-            <td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center"
+            <td class="font-bold bg-emerald-100 dark:bg-emerald-900/30 text-center"
                 style="width:${rw}px;font-size:${hf}px;padding:2px;">${r + 1}</td>`;
-        for (let c = 0; c < n; c++) {
+        for (let c = 0; c < cols; c++) {
             const key = `${r},${c}`;
             const isSel = editorSelection.has(key);
-            const rot = rotOfCellInEditor(r, c, n);
-            const isAffected = !isSel && rot >= 0;
+            const pos = turnOfCellInEditor(r, c, rows, cols);
+            const isAffected = !isSel && pos >= 0;
 
-            const bg = rot >= 0 ? CARDANO_ROT_BG[rot] : 'bg-gray-100 dark:bg-gray-700/30';
+            const bg = pos >= 0 ? CARDANO_ROT_BG[pos] : 'bg-gray-100 dark:bg-gray-700/30';
             const cls = ['custom-cell', 'text-center', 'font-bold', 'font-mono'];
             if (isSel) cls.push('custom-cell-selected');
             if (isAffected) cls.push('custom-cell-affected');
@@ -979,7 +1265,7 @@ function editorClickCell(r, c) {
     if (editorSelection.has(key)) {
         editorSelection.delete(key);
     } else {
-        const orbitKeys = getOrbitKeys(r, c, cardanoGridSize);
+        const orbitKeys = getOrbitKeys(r, c, cardanoGridRows, cardanoGridCols);
         for (const k of orbitKeys) editorSelection.delete(k);
         editorSelection.add(key);
     }
@@ -987,20 +1273,21 @@ function editorClickCell(r, c) {
 }
 
 function randomFillEditor() {
-    const n = cardanoGridSize;
-    const required = n * n / 4;
+    const rows = cardanoGridRows;
+    const cols = cardanoGridCols;
+    const required = (rows * cols) / 4;
 
     if (editorSelection.size < required) {
         const assigned = new Set();
         for (const key of editorSelection) {
             const [r, c] = key.split(',').map(Number);
-            for (const k of getOrbitKeys(r, c, n)) assigned.add(k);
+            for (const k of getOrbitKeys(r, c, rows, cols)) assigned.add(k);
         }
 
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
                 if (assigned.has(`${r},${c}`)) continue;
-                const orbitKeys = getOrbitKeys(r, c, n);
+                const orbitKeys = getOrbitKeys(r, c, rows, cols);
                 const pickKey = orbitKeys[Math.floor(Math.random() * 4)];
                 editorSelection.add(pickKey);
                 for (const k of orbitKeys) assigned.add(k);
@@ -1019,10 +1306,10 @@ function randomFillEditor() {
     do {
         newSelection = new Set();
         const assigned = new Set();
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
                 if (assigned.has(`${r},${c}`)) continue;
-                const orbitKeys = getOrbitKeys(r, c, n);
+                const orbitKeys = getOrbitKeys(r, c, rows, cols);
                 const pickKey = orbitKeys[Math.floor(Math.random() * 4)];
                 newSelection.add(pickKey);
                 for (const k of orbitKeys) assigned.add(k);
@@ -1057,10 +1344,11 @@ function clearEditor() {
 }
 
 function openCustomEditor() {
-    const n = cardanoGridSize;
+    const rows = cardanoGridRows;
+    const cols = cardanoGridCols;
     editorSelection = new Set();
-    for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
             if (cardanoTemplate[r][c]) editorSelection.add(`${r},${c}`);
         }
     }
@@ -1078,8 +1366,9 @@ function closeCustomEditor() {
 }
 
 function applyCustomTemplate() {
-    const n = cardanoGridSize;
-    const required = n * n / 4;
+    const rows = cardanoGridRows;
+    const cols = cardanoGridCols;
+    const required = (rows * cols) / 4;
     if (editorSelection.size !== required) {
         GrassEAD.showMessage(
             `Cần chọn đúng ${required} ô — bạn đang chọn ${editorSelection.size}`,
@@ -1087,7 +1376,7 @@ function applyCustomTemplate() {
         );
         return;
     }
-    const template = Array.from({ length: n }, () => Array(n).fill(false));
+    const template = Array.from({ length: rows }, () => Array(cols).fill(false));
     for (const key of editorSelection) {
         const [r, c] = key.split(',').map(Number);
         template[r][c] = true;

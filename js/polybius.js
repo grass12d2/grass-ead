@@ -331,8 +331,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (viewToggle) {
             viewToggle.innerHTML = isVertical
-                ? '<i class="fas fa-sync-alt mr-2"></i>Xem ngang'
-                : '<i class="fas fa-sync-alt mr-2"></i>Xem dọc';
+                ? '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem ngang</span>'
+                : '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem dọc</span>';
         }
         if (detailViewLabel) {
             detailViewLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
@@ -405,10 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             updateOutput();
         } else {
-            const processed = GrassEAD.handleTextInput(text, true);
-            if (processed !== text) {
-                event.target.value = processed;
-            }
+            GrassEAD.handleTextInputWithCursor(event.target, true);
             updateOutput();
         }
     }
@@ -438,20 +435,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         input.addEventListener('paste', function (e) {
             setTimeout(() => {
-                const text = this.value;
-
                 if (currentMode === 'decrypt') {
                     const cursorPos = this.selectionStart;
-                    const { formatted, cursorPos: newCursorPos } = processDecryptInput(text, cursorPos);
-                    if (formatted !== text) {
+                    const { formatted, cursorPos: newCursorPos } = processDecryptInput(this.value, cursorPos);
+                    if (formatted !== this.value) {
                         this.value = formatted;
                         this.setSelectionRange(newCursorPos, newCursorPos);
                     }
                 } else {
-                    const processed = GrassEAD.handleTextInput(text, true);
-                    if (processed !== text) {
-                        this.value = processed;
-                    }
+                    GrassEAD.handleTextInputWithCursor(this, true);
                 }
                 updateOutput();
             }, 10);

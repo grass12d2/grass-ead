@@ -58,10 +58,11 @@
                     </button>
                 </div>
 
-                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                <div class="flex items-center gap-2 w-full sm:w-auto sm:flex-1 sm:min-w-[200px]">
                     <label class="text-sm font-medium dark:text-white whitespace-nowrap">Khoá ban đầu:</label>
-                    <input type="text" id="key-input" value=""
-                        class="flex-1 px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent uppercase"
+                    <input type="text" id="key-input" value="" spellcheck="false" autocorrect="off" autocapitalize="off"
+                        autocomplete="off"
+                        class="flex-1 min-w-0 px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent uppercase"
                         placeholder="А" />
                 </div>
             </div>
@@ -95,8 +96,8 @@
                             </button>
                         </div>
                     </div>
-                    <textarea id="vigenere-input" class="input-area"
-                        placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
+                    <textarea id="vigenere-input" class="input-area" spellcheck="false" autocorrect="off"
+                        autocapitalize="off" placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-2">
@@ -112,8 +113,8 @@
                             </button>
                         </div>
                     </div>
-                    <textarea id="vigenere-output" class="input-area" placeholder="Kết quả sẽ hiển thị ở đây"
-                        readonly></textarea>
+                    <textarea id="vigenere-output" class="input-area" spellcheck="false" autocorrect="off"
+                        autocapitalize="off" placeholder="Kết quả sẽ hiển thị ở đây" readonly></textarea>
                 </div>
             </div>
 
@@ -127,8 +128,8 @@
                         </span>
                     </h2>
                     <button id="view-toggle"
-                        class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-medium transition-colors">
-                        <i class="fas fa-sync-alt mr-2"></i>Xem dọc
+                        class="view-toggle-btn px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-medium transition-colors">
+                        <i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem dọc</span>
                     </button>
                 </div>
                 <div id="vigenere-table" class="pb-2"></div>

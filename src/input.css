@@ -191,7 +191,18 @@
   }
 
   .input-area {
-    @apply w-full h-48 p-4 bg-white dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white dark:placeholder-gray-400 resize-none transition-all duration-200;
+    @apply w-full p-4 bg-white dark:bg-gray-700 rounded-lg border border-amber-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white dark:placeholder-gray-400 resize-none transition-all duration-200;
+    height: 192px;
+    /* desktop: h-48 */
+  }
+
+  @media (max-width: 767px) {
+    .input-area {
+      height: 134px;
+      /* mobile: giảm 30% (192 × 0.7) */
+      padding: 12px;
+      /* p-3 thay vì p-4 cho cân đối */
+    }
   }
 
   .btn-primary {
@@ -264,13 +275,6 @@ input[type="range"]::-moz-range-thumb {
   animation: fadeOut 0.3s ease-in;
 }
 
-/* ==================== MESSAGE POPUP ==================== */
-.message-popup {
-  max-width: 500px;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
 
 /* ==================== BUTTON EFFECTS ==================== */
 button {
@@ -355,4 +359,34 @@ main {
     height: 60vh;
     max-height: 500px;
   }
+}
+
+/* ==================== VIEW TOGGLE BUTTON ==================== */
+.view-toggle-text {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .view-toggle-text {
+    display: inline;
+  }
+}
+
+/* Icon chỉ có margin khi text hiện */
+.view-toggle-btn i {
+  margin-right: 0;
+}
+
+@media (min-width: 640px) {
+  .view-toggle-btn i {
+    margin-right: 0.5rem;
+  }
+}
+
+/* ==================== RESET FOCUS OUTLINE ==================== */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none;
 }

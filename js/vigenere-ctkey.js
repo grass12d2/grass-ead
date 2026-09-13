@@ -496,8 +496,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (viewToggle) {
             viewToggle.innerHTML = isVertical
-                ? '<i class="fas fa-sync-alt mr-2"></i>Xem ngang'
-                : '<i class="fas fa-sync-alt mr-2"></i>Xem dọc';
+                ? '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem ngang</span>'
+                : '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem dọc</span>';
         }
         if (viewModeLabel) {
             viewModeLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
@@ -505,11 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleInput(event) {
-        const text = event.target.value;
-        const processed = GrassEAD.handleTextInput(text, true);
-        if (processed !== text) {
-            event.target.value = processed;
-        }
+        GrassEAD.handleTextInputWithCursor(event.target, true);
         updateOutput();
     }
 
@@ -544,12 +540,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleKeyInput(event) {
-        const text = event.target.value;
+        const textarea = event.target;
+        const originalText = textarea.value;
+        const cursorPos = textarea.selectionStart;
+
         let processed = '';
         let hasInvalidChar = false;
         let invalidChars = [];
 
-        for (let char of text) {
+        for (let char of originalText) {
             if (char === ' ' || char === '\n' || char === '\t') continue;
             if (isValidCTKeyChar(char)) {
                 processed += char;
@@ -564,12 +563,20 @@ document.addEventListener('DOMContentLoaded', function () {
             GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я`, 'error');
         }
 
-        let finalKey = processed.toUpperCase();
-        finalKey = finalKey.replace(/[^А-Я]/g, '');
+        const finalKey = processed.toUpperCase().replace(/[^А-Я]/g, '');
 
-        const cursorPos = this.selectionStart;
-        this.value = finalKey;
-        this.setSelectionRange(cursorPos, cursorPos);
+        if (finalKey === originalText) {
+            currentKey = finalKey;
+            updateOutput();
+            return;
+        }
+
+        const beforeCursor = originalText.slice(0, cursorPos);
+        const processedBefore = beforeCursor.toUpperCase().replace(/[^А-Я]/g, '');
+        const newCursorPos = Math.min(processedBefore.length, finalKey.length);
+
+        textarea.value = finalKey;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
 
         currentKey = finalKey;
         const currentText = input ? input.value : '';
@@ -583,11 +590,7 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('input', handleInput);
         input.addEventListener('paste', function (e) {
             setTimeout(() => {
-                const text = this.value;
-                const processed = GrassEAD.handleTextInput(text, true);
-                if (processed !== text) {
-                    this.value = processed;
-                }
+                GrassEAD.handleTextInputWithCursor(this, true);
                 updateOutput();
             }, 10);
         });
@@ -617,37 +620,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         keyInput.addEventListener('input', handleKeyInput);
 
-        keyInput.addEventListener('paste', function (e) {
+        keyInput.addEventListener('paste', function () {
             setTimeout(() => {
-                const text = this.value;
-                let processed = '';
-                let hasInvalidChar = false;
-                let invalidChars = [];
-
-                for (let char of text) {
-                    if (char === ' ' || char === '\n' || char === '\t') continue;
-                    if (isValidCTKeyChar(char)) {
-                        processed += char;
-                    } else {
-                        hasInvalidChar = true;
-                        invalidChars.push(char);
-                    }
-                }
-
-                if (hasInvalidChar) {
-                    const uniqueInvalid = [...new Set(invalidChars)];
-                    GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я`, 'error');
-                }
-
-                let finalKey = processed.toUpperCase();
-                finalKey = finalKey.replace(/[^А-Я]/g, '');
-                this.value = finalKey;
-                currentKey = finalKey;
-                const currentText = input ? input.value : '';
-                const isDecrypt = currentMode === 'decrypt';
-                renderCTKeyTable(currentText, finalKey || 'А', isDecrypt, isVertical);
-                updateCTKeyInfo(finalKey || 'А');
-                updateOutput();
+                handleKeyInput({ target: keyInput });
             }, 10);
         });
     }

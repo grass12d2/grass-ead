@@ -477,8 +477,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (viewToggle) {
             viewToggle.innerHTML = isVertical
-                ? '<i class="fas fa-sync-alt mr-2"></i>Xem ngang'
-                : '<i class="fas fa-sync-alt mr-2"></i>Xem dọc';
+                ? '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem ngang</span>'
+                : '<i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem dọc</span>';
         }
         if (detailViewLabel) {
             detailViewLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
@@ -486,11 +486,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleInput(event) {
-        const text = event.target.value;
-        const processed = GrassEAD.handleTextInput(text, true);
-        if (processed !== text) {
-            event.target.value = processed;
-        }
+        GrassEAD.handleTextInputWithCursor(event.target, true);
         updateOutput();
     }
 
@@ -554,11 +550,7 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('input', handleInput);
         input.addEventListener('paste', function (e) {
             setTimeout(() => {
-                const text = this.value;
-                const processed = GrassEAD.handleTextInput(text, true);
-                if (processed !== text) {
-                    this.value = processed;
-                }
+                GrassEAD.handleTextInputWithCursor(this, true);
                 updateOutput();
             }, 10);
         });

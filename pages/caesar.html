@@ -100,7 +100,7 @@
                             </button>
                         </div>
                     </div>
-                    <textarea id="caesar-input" class="input-area"
+                    <textarea id="caesar-input" class="input-area" spellcheck="false" autocorrect="off" autocapitalize="off"
                         placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
                 </div>
                 <div>
@@ -117,7 +117,7 @@
                             </button>
                         </div>
                     </div>
-                    <textarea id="caesar-output" class="input-area" placeholder="Kết quả sẽ hiển thị ở đây"
+                    <textarea id="caesar-output" class="input-area" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Kết quả sẽ hiển thị ở đây"
                         readonly></textarea>
                 </div>
             </div>
@@ -132,8 +132,8 @@
                             class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">(Ngang)</span>
                     </h2>
                     <button id="view-toggle"
-                        class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-medium transition-colors">
-                        <i class="fas fa-sync-alt mr-2"></i>Xem dọc
+                        class="view-toggle-btn px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-medium transition-colors">
+                        <i class="fas fa-sync-alt"></i><span class="view-toggle-text">Xem dọc</span>
                     </button>
                 </div>
                 <div id="caesar-detail" class="pb-2"></div>

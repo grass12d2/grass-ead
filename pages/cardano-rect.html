@@ -13,7 +13,7 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cardan Grille - Grass EAD</title>
+    <title>Cardan Rect - Grass EAD</title>
     <link rel="stylesheet" href="../css/output.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
@@ -32,7 +32,7 @@
 
         .anim-step.active {
             opacity: 1;
-            background: rgba(167, 139, 250, 0.18);
+            background: rgba(5, 150, 105, 0.22);
             transform: translateY(-2px);
         }
 
@@ -40,7 +40,6 @@
             opacity: 1;
         }
 
-        /* ===== Progress dot: spinner / check ===== */
         .anim-step-dot {
             width: 24px;
             height: 24px;
@@ -63,8 +62,8 @@
         .anim-step.active .anim-step-dot {
             background: transparent;
             border: 2.5px solid transparent;
-            border-top-color: #8b5cf6;
-            border-right-color: #8b5cf6;
+            border-top-color: #059669;
+            border-right-color: #059669;
             animation: cardanoSpin 0.8s linear infinite;
         }
 
@@ -75,8 +74,8 @@
         }
 
         .anim-step.done .anim-step-dot {
-            background: #10b981;
-            border-color: #10b981;
+            background: #059669;
+            border-color: #059669;
             animation: none;
         }
 
@@ -104,19 +103,26 @@
         }
 
         .anim-step-angle {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
-            font-family: ui-monospace, monospace;
             color: #6b7280;
             line-height: 1.4;
             margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 18px;
+        }
+
+        .anim-step-angle i {
+            font-size: 15px;
         }
 
         .dark .anim-step-angle {
             color: #9ca3af;
         }
 
-        /* ===== Grid cells (animation) ===== */
+        /* ===== Grid cells ===== */
         .cardano-anim-cell {
             display: flex;
             align-items: center;
@@ -141,13 +147,13 @@
             0% {
                 transform: scale(0) rotate(-15deg);
                 opacity: 0;
-                background: rgba(167, 139, 250, 0.75);
+                background: rgba(5, 150, 105, 0.8);
             }
 
             60% {
                 transform: scale(1.18) rotate(3deg);
                 opacity: 1;
-                background: rgba(167, 139, 250, 0.4);
+                background: rgba(5, 150, 105, 0.45);
             }
 
             100% {
@@ -159,8 +165,7 @@
 
         .cardano-anim-cell-pad {
             color: #9ca3af !important;
-            font-style: italic;
-            opacity: 0.7;
+            opacity: 0.75;
         }
 
         .dark .cardano-anim-cell-pad {
@@ -168,29 +173,31 @@
         }
 
         .cardano-anim-grille {
-            transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
+            transition: transform 2.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
             will-change: transform;
+            transform-style: preserve-3d;
+            backface-visibility: visible;
         }
 
         .anim-chunk {
             display: inline-block;
             padding: 3px 7px;
             margin: 2px;
-            background: rgba(167, 139, 250, 0.15);
+            background: rgba(5, 150, 105, 0.15);
             border-radius: 5px;
             font-family: ui-monospace, monospace;
             font-weight: 700;
-            color: #7c3aed;
+            color: #065f46;
             font-size: 14px;
             letter-spacing: 0.05em;
         }
 
         .dark .anim-chunk {
-            color: #c4b5fd;
-            background: rgba(167, 139, 250, 0.12);
+            color: #6ee7b7;
+            background: rgba(5, 150, 105, 0.12);
         }
 
-        /* ===== Custom template editor ===== */
+        /* ===== Custom editor ===== */
         .custom-cell {
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
@@ -203,7 +210,7 @@
         }
 
         .custom-cell-selected {
-            box-shadow: inset 0 0 0 3px #8b5cf6, 0 0 0 1px rgba(139, 92, 246, 0.4);
+            box-shadow: inset 0 0 0 3px #059669, 0 0 0 1px rgba(5, 150, 105, 0.5);
         }
 
         .custom-cell-selected::after {
@@ -223,7 +230,7 @@
             transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
-        /* ===== Decrypt: ô đã có sẵn ciphertext ===== */
+        /* ===== Decrypt cells ===== */
         .cardano-anim-cell-cipher {
             color: #9ca3af;
             font-style: normal;
@@ -233,28 +240,27 @@
             color: #6b7280;
         }
 
-        /* ===== Decrypt: ô đang được đọc ===== */
         .cardano-anim-cell-revealed {
-            color: #059669 !important;
-            background: rgba(16, 185, 129, 0.18) !important;
+            color: #047857 !important;
+            background: rgba(5, 150, 105, 0.22) !important;
             animation: cardanoReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .dark .cardano-anim-cell-revealed {
             color: #34d399 !important;
-            background: rgba(16, 185, 129, 0.22) !important;
+            background: rgba(5, 150, 105, 0.25) !important;
         }
 
         @keyframes cardanoReveal {
             0% {
                 transform: scale(1.18);
-                background: rgba(16, 185, 129, 0.85);
+                background: rgba(5, 150, 105, 0.85);
                 color: #ffffff !important;
             }
 
             100% {
                 transform: scale(1);
-                background: rgba(16, 185, 129, 0.18);
+                background: rgba(5, 150, 105, 0.22);
             }
         }
     </style>
@@ -266,21 +272,38 @@
     <div id="warning-placeholder"></div>
 
     <main class="max-w-screen-xl mx-auto p-6 flex-1 w-full">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Grille</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Rect</h1>
 
-        <div class="bg-violet-100 dark:bg-gray-800 border border-violet-200 dark:border-gray-700 p-4 rounded-lg mb-6">
+        <div class="bg-emerald-100 dark:bg-gray-800 border border-emerald-400 dark:border-gray-700 p-4 rounded-lg mb-6">
             <p class="text-sm text-gray-700 dark:text-gray-300">
-                <i class="fas fa-info-circle text-violet-500 mr-1"></i>
+                <i class="fas fa-info-circle text-emerald-700 dark:text-emerald-400 mr-1"></i>
                 <strong>Quy tắc:</strong>
-                Dùng tấm lưới 2m×2m khoét m² lỗ sao cho khi xoay 0°/90°/180°/270° các lỗ phủ kín toàn bộ lưới.
+                Dùng tấm lưới chữ nhật <strong>R × C</strong> (R = 2m, C = 2k) khoét <strong>R·C/4</strong> lỗ.
                 <br>
-                Bản rõ ghi lần lượt vào các lỗ theo 4 lượt xoay, đọc lưới theo hàng để ra bản mã.
+                Lưới chữ nhật <strong>không xoay 90°</strong> được, nên dùng 4 phép biến đổi:
                 <br>
-                Ô trống (nếu bản rõ chưa đầy) được lấp bằng <strong>ký tự đệm ngẫu nhiên</strong>.
+                <span class="inline-flex items-center gap-2 mt-1 flex-wrap">
+                    <span
+                        class="px-2 py-0.5 rounded bg-emerald-300 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 text-xs font-semibold">1.
+                        Gốc</span>
+                    <span
+                        class="px-2 py-0.5 rounded bg-violet-200 dark:bg-violet-900/40 text-violet-900 dark:text-violet-200 text-xs font-semibold">2.
+                        Đảo 180°</span>
+                    <span
+                        class="px-2 py-0.5 rounded bg-rose-200 dark:bg-rose-900/40 text-rose-900 dark:text-rose-200 text-xs font-semibold">3.
+                        Lật dọc</span>
+                    <span
+                        class="px-2 py-0.5 rounded bg-amber-200 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 text-xs font-semibold">4.
+                        Lật ngang</span>
+                </span>
                 <br>
-                <span class="text-violet-500 dark:text-violet-400">
+                Có <strong>24 thứ tự</strong> áp dụng 4 vị trí — mỗi thứ tự là một khoá phụ.
+                <br>
+                Ô trống được lấp bằng ký tự <strong>–</strong> (gạch ngang).
+                <br>
+                <span class="text-emerald-800 dark:text-emerald-400">
                     <i class="fas fa-lightbulb mr-1"></i>
-                    Số khoá tiềm năng = 4^(m²). Với lưới 8×8: hơn 4 tỷ khoá.
+                    Số khoá tiềm năng = 4^(R·C/4) × 24. Với lưới 6×10: hơn 25 tỷ khoá.
                 </span>
             </p>
         </div>
@@ -303,22 +326,59 @@
                 <div class="flex items-center gap-2">
                     <label class="text-sm font-medium dark:text-white whitespace-nowrap">Lưới:</label>
                     <select id="grid-size"
-                        class="px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                        <option value="4">4 × 4</option>
-                        <option value="6" selected>6 × 6</option>
-                        <option value="8">8 × 8</option>
-                        <option value="10">10 × 10</option>
+                        class="px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-emerald-600 focus:border-transparent">
+                        <option value="4x6">4 × 6</option>
+                        <option value="6x8">6 × 8</option>
+                        <option value="6x10" selected>6 × 10</option>
                     </select>
                 </div>
 
                 <button id="new-template"
-                    class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
                     <i class="fas fa-dice mr-1"></i> Tạo template mới
                 </button>
 
                 <button id="custom-template"
-                    class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
                     <i class="fas fa-pen-ruler mr-1"></i> Tự khoét lỗ
+                </button>
+            </div>
+
+            <!-- Order selector -->
+            <div
+                class="flex flex-wrap items-center gap-3 p-4 bg-emerald-100 dark:bg-gray-800 rounded-lg shadow border border-emerald-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <button id="order-prev" type="button"
+                        class="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-emerald-200 dark:border-gray-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-600 active:scale-95 flex items-center justify-center transition-all"
+                        aria-label="Thứ tự trước">
+                        <i class="fas fa-chevron-left text-sm"></i>
+                    </button>
+
+                    <div
+                        class="px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-emerald-200 dark:border-gray-600 min-w-[120px] text-center">
+                        <div
+                            class="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold leading-none mb-1">
+                            Thứ tự
+                        </div>
+                        <div class="font-mono font-bold text-gray-900 dark:text-white leading-none">
+                            <span id="order-index">1</span><span
+                                class="text-gray-400 dark:text-gray-500 text-sm">/24</span>
+                        </div>
+                    </div>
+
+                    <button id="order-next" type="button"
+                        class="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-emerald-200 dark:border-gray-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-600 active:scale-95 flex items-center justify-center transition-all"
+                        aria-label="Thứ tự sau">
+                        <i class="fas fa-chevron-right text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Hiển thị hoán vị hiện tại -->
+                <div id="order-visual" class="flex items-center gap-1 ml-2"></div>
+
+                <button id="order-reset" type="button"
+                    class="ml-auto px-3 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg text-xs font-medium transition-colors">
+                    <i class="fas fa-rotate-left mr-1"></i> Về mặc định
                 </button>
             </div>
 
@@ -339,7 +399,8 @@
                         </div>
                     </div>
                     <textarea id="cardano-input" class="input-area" spellcheck="false" autocorrect="off"
-                        autocapitalize="off" placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
+                        autocapitalize="off"
+                        placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ). Chấp nhận cả '-' và '–'."></textarea>
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-2">
@@ -360,19 +421,20 @@
                 </div>
             </div>
 
-            <!-- ===== Template & lưới kết quả ===== -->
+            <!-- Template & lưới kết quả -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    <i class="fas fa-border-all text-violet-500 mr-2"></i>Template &amp; lưới kết quả
+                    <i class="fas fa-border-all text-emerald-700 dark:text-emerald-400 mr-2"></i>Template &amp; lưới kết
+                    quả
                 </h2>
                 <div id="cardano-template"></div>
 
-                <!-- ===== Custom template editor ===== -->
+                <!-- Custom template editor -->
                 <div id="custom-editor"
-                    class="hidden mt-6 bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-violet-300 dark:border-violet-700 p-4">
+                    class="hidden mt-6 bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-emerald-500 dark:border-emerald-600 p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            <i class="fas fa-pen-ruler text-violet-500 mr-2"></i>Tự khoét lỗ khoét
+                            <i class="fas fa-pen-ruler text-emerald-700 dark:text-emerald-400 mr-2"></i>Tự khoét lỗ
                         </h2>
                         <div class="flex flex-wrap items-center gap-2">
                             <button id="custom-random" type="button"
@@ -384,7 +446,7 @@
                                 <i class="fas fa-eraser mr-1"></i> Xoá hết
                             </button>
                             <button id="custom-apply" type="button"
-                                class="px-3 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors">
                                 <i class="fas fa-check mr-1"></i> Áp dụng
                             </button>
                             <button id="custom-cancel" type="button"
@@ -394,28 +456,28 @@
                         </div>
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        <i class="fas fa-info-circle text-violet-500 mr-1"></i>
-                        Nhấp vào ô để chọn làm lỗ khoét. Mỗi quỹ đạo 4 ô (do xoay 90°)
+                        <i class="fas fa-info-circle text-emerald-700 dark:text-emerald-400 mr-1"></i>
+                        Nhấp vào ô để chọn làm lỗ khoét. Mỗi quỹ đạo 4 ô (do 4 phép biến đổi)
                         chỉ được chọn <strong>đúng 1 ô</strong>.
                         Cần chọn tổng cộng <strong id="custom-required"
-                            class="text-violet-600 dark:text-violet-400">9</strong> ô.
+                            class="text-emerald-800 dark:text-emerald-400">15</strong> ô.
                         <span class="text-gray-400 dark:text-gray-500">— Đã chọn:
-                            <strong id="custom-count" class="text-violet-600 dark:text-violet-400">0</strong>
+                            <strong id="custom-count" class="text-emerald-800 dark:text-emerald-400">0</strong>
                         </span>
                     </p>
                     <div id="custom-grid"></div>
                 </div>
             </div>
 
-            <!-- ===== Hoạt ảnh xoay lưới ===== -->
+            <!-- Hoạt ảnh -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        <i class="fas fa-play-circle text-violet-500 mr-2"></i>Hoạt ảnh xoay lưới
+                        <i class="fas fa-play-circle text-emerald-700 dark:text-emerald-400 mr-2"></i>Hoạt ảnh 4 lượt
                     </h2>
                     <div class="flex items-center gap-2">
                         <button id="anim-play" type="button"
-                            class="px-4 py-2 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors shadow-md">
                             <i class="fas fa-play mr-1"></i> Chạy hoạt ảnh
                         </button>
                         <button id="anim-reset" type="button"
@@ -425,50 +487,45 @@
                     </div>
                 </div>
 
-                <!-- Progress -->
                 <div id="anim-progress" class="flex items-center justify-between gap-2 mb-5">
                     <div class="anim-step" data-step="0">
                         <span class="anim-step-dot"></span>
                         <span class="anim-step-label">Lượt 1</span>
-                        <span class="anim-step-angle">0°</span>
+                        <span class="anim-step-angle" data-pos-label>—</span>
                     </div>
                     <div class="anim-step" data-step="1">
                         <span class="anim-step-dot"></span>
                         <span class="anim-step-label">Lượt 2</span>
-                        <span class="anim-step-angle">90°</span>
+                        <span class="anim-step-angle" data-pos-label>—</span>
                     </div>
                     <div class="anim-step" data-step="2">
                         <span class="anim-step-dot"></span>
                         <span class="anim-step-label">Lượt 3</span>
-                        <span class="anim-step-angle">180°</span>
+                        <span class="anim-step-angle" data-pos-label>—</span>
                     </div>
                     <div class="anim-step" data-step="3">
                         <span class="anim-step-dot"></span>
                         <span class="anim-step-label">Lượt 4</span>
-                        <span class="anim-step-angle">270°</span>
+                        <span class="anim-step-angle" data-pos-label>—</span>
                     </div>
                 </div>
 
-                <!-- Stage -->
                 <div id="anim-stage" class="mb-4"></div>
 
-                <!-- Điều hướng xem lại từng lượt -->
                 <div id="anim-nav" style="display:none;" class="items-center justify-center gap-3 mt-4">
                     <button id="anim-prev" type="button"
                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm">
                         <i class="fas fa-arrow-left mr-1"></i> Lượt trước
                     </button>
                     <button id="anim-next" type="button"
-                        class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md">
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md">
                         Lượt tiếp <i class="fas fa-arrow-right ml-1"></i>
                     </button>
                 </div>
 
-                <!-- Status -->
                 <div id="anim-status"
                     class="text-center text-sm text-gray-500 dark:text-gray-400 min-h-[24px] mt-3 font-medium"></div>
 
-                <!-- Result -->
                 <div id="anim-result" class="hidden mt-3"></div>
             </div>
         </div>
@@ -480,8 +537,7 @@
     <script src="../js/main.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/sidebar.js"></script>
-    <script src="../js/cardano.js"></script>
-    <!-- <script src="../js/warning.js"></script> -->
+    <script src="../js/cardano-rect.js"></script>
 </body>
 
 </html>
