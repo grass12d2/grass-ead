@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardan Grille - Grass EAD</title>
+    <link rel="stylesheet" href="../css/output.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        /* Progress steps */
+        .anim-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 4px;
+            border-radius: 10px;
+            transition: all 0.35s ease;
+            opacity: 0.45;
+        }
+
+        .anim-step.active {
+            opacity: 1;
+            background: rgba(167, 139, 250, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .anim-step.done {
+            opacity: 1;
+        }
+
+        /* Progress dot: spinner / check */
+        .anim-step-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s, border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .dark .anim-step-dot {
+            background: #374151;
+            border-color: #4b5563;
+        }
+
+        /* Active: vòng xoay violet */
+        .anim-step.active .anim-step-dot {
+            background: transparent;
+            border: 3px solid transparent;
+            border-top-color: #8b5cf6;
+            border-right-color: #8b5cf6;
+            animation: cardanoSpin 0.8s linear infinite;
+        }
+
+        @keyframes cardanoSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Done: nền xanh + dấu tick */
+        .anim-step.done .anim-step-dot {
+            background: #10b981;
+            border-color: #10b981;
+            animation: none;
+        }
+
+        .anim-step.done .anim-step-dot::before {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg) translate(-1px, -2px);
+        }
+
+        .anim-step-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6b7280;
+        }
+
+        .dark .anim-step-label {
+            color: #9ca3af;
+        }
+
+        .anim-step-angle {
+            font-size: 10px;
+            font-family: ui-monospace, monospace;
+            color: #9ca3af;
+        }
+
+        /* Grid cells */
+        .cardano-anim-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: ui-monospace, monospace;
+            font-weight: 700;
+            font-size: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: #fafafa;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .dark .cardano-anim-cell {
+            background: #1f2937;
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .cardano-anim-cell-filled {
+            animation: cardanoDropIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes cardanoDropIn {
+            0% {
+                transform: scale(0) rotate(-15deg);
+                opacity: 0;
+                background: rgba(167, 139, 250, 0.75);
+            }
+
+            60% {
+                transform: scale(1.18) rotate(3deg);
+                opacity: 1;
+                background: rgba(167, 139, 250, 0.4);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                background: transparent;
+            }
+        }
+
+        .cardano-anim-cell-pad {
+            color: #9ca3af !important;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .dark .cardano-anim-cell-pad {
+            color: #6b7280 !important;
+        }
+
+        .cardano-anim-grille {
+            transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
+            will-change: transform;
+        }
+
+        .anim-chunk {
+            display: inline-block;
+            padding: 3px 7px;
+            margin: 2px;
+            background: rgba(167, 139, 250, 0.15);
+            border-radius: 5px;
+            font-family: ui-monospace, monospace;
+            font-weight: 700;
+            color: #7c3aed;
+            font-size: 14px;
+            letter-spacing: 0.05em;
+        }
+
+        .dark .anim-chunk {
+            color: #c4b5fd;
+            background: rgba(167, 139, 250, 0.12);
+        }
+
+        .custom-cell {
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            position: relative;
+        }
+
+        .custom-cell:hover {
+            transform: scale(1.08);
+            z-index: 1;
+        }
+
+        .custom-cell-selected {
+            box-shadow: inset 0 0 0 3px #8b5cf6, 0 0 0 1px rgba(139, 92, 246, 0.4);
+        }
+
+        .custom-cell-selected::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 4px;
+            border: 1px dashed rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
+
+        .custom-cell-affected {
+            opacity: 0.55;
+        }
+
+        #custom-grid table {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-amber-50 dark:bg-gray-900 flex flex-col">
+    <div id="navbar-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+
+    <main class="max-w-screen-xl mx-auto p-6 flex-1 w-full">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Grille</h1>
+
+        <div class="bg-violet-100 dark:bg-gray-800 border border-violet-200 dark:border-gray-700 p-4 rounded-lg mb-6">
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+                <i class="fas fa-info-circle text-violet-500 mr-1"></i>
+                <strong>Quy tắc:</strong>
+                Dùng tấm lưới 2m×2m khoét m² lỗ sao cho khi xoay 0°/90°/180°/270° các lỗ phủ kín toàn bộ lưới.
+                <br>
+                Bản rõ ghi lần lượt vào các lỗ theo 4 lượt xoay, đọc lưới theo hàng để ra bản mã.
+                <br>
+                Ô trống (nếu bản rõ chưa đầy) được lấp bằng <strong>ký tự đệm ngẫu nhiên</strong>.
+                <br>
+                <span class="text-violet-500 dark:text-violet-400">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    Số khoá tiềm năng = 4^(m²). Với lưới 8×8: hơn 4 tỷ khoá.
+                </span>
+            </p>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Controls -->
+            <div
+                class="flex flex-wrap items-center gap-4 p-4 bg-amber-100 dark:bg-gray-800 rounded-lg shadow border border-amber-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <button id="mode-encrypt"
+                        class="px-4 py-2 bg-red-500 border-2 border-red-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                        <i class="fas fa-lock mr-1"></i> Mã hoá
+                    </button>
+                    <button id="mode-decrypt"
+                        class="px-4 py-2 bg-transparent border-2 border-blue-400 text-blue-500 dark:text-blue-400 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                        <i class="fas fa-lock-open mr-1"></i> Giải mã
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium dark:text-white whitespace-nowrap">Lưới:</label>
+                    <select id="grid-size"
+                        class="px-3 py-2 bg-amber-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="4">4 × 4</option>
+                        <option value="6" selected>6 × 6</option>
+                        <option value="8">8 × 8</option>
+                        <option value="10">10 × 10</option>
+                    </select>
+                </div>
+
+                <button id="new-template"
+                    class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                    <i class="fas fa-dice mr-1"></i> Tạo template mới
+                </button>
+
+                <button id="custom-template"
+                    class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                    <i class="fas fa-pen-ruler mr-1"></i> Tự khoét lỗ
+                </button>
+            </div>
+
+            <!-- Input / Output -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label id="input-label" class="text-sm font-medium dark:text-white">Văn bản gốc</label>
+                        <div class="flex items-center gap-2">
+                            <button id="paste-btn"
+                                class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-paste mr-1"></i> Dán
+                            </button>
+                            <button id="copy-input-btn"
+                                class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-copy mr-1"></i> Sao chép
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="cardano-input" class="input-area"
+                        placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label id="output-label" class="text-sm font-medium dark:text-white">Văn bản mã hoá</label>
+                        <div class="flex items-center gap-2">
+                            <button id="copy-output-btn"
+                                class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-copy mr-1"></i> Sao chép
+                            </button>
+                            <button id="clear-btn"
+                                class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-trash mr-1"></i> Xoá
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="cardano-output" class="input-area" placeholder="Kết quả sẽ hiển thị ở đây"
+                        readonly></textarea>
+                </div>
+            </div>
+
+            <!-- ===== Template & lưới kết quả (RIÊNG) ===== -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-border-all text-violet-500 mr-2"></i>Template &amp; lưới kết quả
+                </h2>
+                <div id="cardano-template"></div>
+                <!-- ===== Custom template editor (ẩn mặc định) ===== -->
+                <div id="custom-editor"
+                    class="hidden mt-6 bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-violet-300 dark:border-violet-700 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <i class="fas fa-pen-ruler text-violet-500 mr-2"></i>Tự khoét lỗ khoét
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="custom-random" type="button"
+                                class="px-3 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-dice mr-1"></i> Điền ngẫu nhiên
+                            </button>
+                            <button id="custom-clear" type="button"
+                                class="px-3 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-eraser mr-1"></i> Xoá hết
+                            </button>
+                            <button id="custom-apply" type="button"
+                                class="px-3 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-check mr-1"></i> Áp dụng
+                            </button>
+                            <button id="custom-cancel" type="button"
+                                class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-times mr-1"></i> Huỷ
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <i class="fas fa-info-circle text-violet-500 mr-1"></i>
+                        Nhấp vào ô để chọn làm lỗ khoét. Mỗi quỹ đạo 4 ô (do xoay 90°)
+                        chỉ được chọn <strong>đúng 1 ô</strong>.
+                        Cần chọn tổng cộng <strong id="custom-required"
+                            class="text-violet-600 dark:text-violet-400">9</strong> ô.
+                        <span class="text-gray-400 dark:text-gray-500">— Đã chọn:
+                            <strong id="custom-count" class="text-violet-600 dark:text-violet-400">0</strong>
+                        </span>
+                    </p>
+                    <div id="custom-grid"></div>
+                </div>
+            </div>
+
+            <!-- ===== Hoạt ảnh xoay lưới (RIÊNG) ===== -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-play-circle text-violet-500 mr-2"></i>Hoạt ảnh xoay lưới
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button id="anim-play" type="button"
+                            class="px-4 py-2 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                            <i class="fas fa-play mr-1"></i> Chạy hoạt ảnh
+                        </button>
+                        <button id="anim-reset" type="button"
+                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md">
+                            <i class="fas fa-rotate-left mr-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div id="anim-progress" class="flex items-center justify-between gap-2 mb-5">
+                    <div class="anim-step" data-step="0">
+                        <span class="anim-step-dot"></span>
+                        <span class="anim-step-label">Lượt 1</span>
+                        <span class="anim-step-angle">0°</span>
+                    </div>
+                    <div class="anim-step" data-step="1">
+                        <span class="anim-step-dot"></span>
+                        <span class="anim-step-label">Lượt 2</span>
+                        <span class="anim-step-angle">90°</span>
+                    </div>
+                    <div class="anim-step" data-step="2">
+                        <span class="anim-step-dot"></span>
+                        <span class="anim-step-label">Lượt 3</span>
+                        <span class="anim-step-angle">180°</span>
+                    </div>
+                    <div class="anim-step" data-step="3">
+                        <span class="anim-step-dot"></span>
+                        <span class="anim-step-label">Lượt 4</span>
+                        <span class="anim-step-angle">270°</span>
+                    </div>
+                </div>
+
+                <!-- Stage -->
+                <div id="anim-stage" class="mb-4"></div>
+
+                <!-- Điều hướng xem lại từng lượt (hiện sau khi chạy xong) -->
+                <div id="anim-nav" style="display:none;" class="items-center justify-center gap-3 mt-4">
+                    <button id="anim-prev" type="button"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm">
+                        <i class="fas fa-arrow-left mr-1"></i> Lượt trước
+                    </button>
+                    <button id="anim-next" type="button"
+                        class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-md">
+                        Lượt tiếp <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div id="anim-status"
+                    class="text-center text-sm text-gray-500 dark:text-gray-400 min-h-[24px] mt-3 font-medium"></div>
+
+                <!-- Result -->
+                <div id="anim-result" class="hidden mt-3"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/cardano.js"></script>
+</body>
+
+</html>

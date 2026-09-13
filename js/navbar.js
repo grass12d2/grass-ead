@@ -11,6 +11,7 @@
         { id: 'bellaso', name: 'Bellaso', path: '/pages/bellaso.html', icon: 'fa-key', color: 'pink', desc: 'Vigenère với khoá' },
         { id: 'vigenere-autokey', name: 'Vigenère Autokey', path: '/pages/vigenere-autokey.html', icon: 'fa-lock', color: 'orange', desc: 'Gamma = Khoá + Văn bản' },
         { id: 'vigenere-ctkey', name: 'Vigenère Ciphertext', path: '/pages/vigenere-ctkey.html', icon: 'fa-lock-open', color: 'cyan', desc: 'Gamma = Khoá + Bản mã' },
+        { id: 'cardano', name: 'Cardano Grille', path: '/pages/cardano.html', icon: 'fa-border-all', color: 'violet', desc: 'Lưới khoét xoay 4 vị trí' },
     ];
 
     let isInPages = false;
@@ -30,6 +31,7 @@
             pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
             orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
             cyan: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+            violet: 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400',
         };
         return map[color] || map.blue;
     }
