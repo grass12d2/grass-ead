@@ -1,43 +1,3 @@
-/// Theme toggle
-document.addEventListener('DOMContentLoaded', function () {
-    const themeToggle = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
-    const darkIcon = document.getElementById('theme-toggle-dark-icon');
-    const lightIcon = document.getElementById('theme-toggle-light-icon');
-
-    // Hàm cập nhật icon theo theme
-    function updateThemeIcon() {
-        if (htmlElement.classList.contains('dark')) {
-            // Dark mode → hiện mặt trời
-            if (darkIcon) darkIcon.classList.add('hidden');
-            if (lightIcon) lightIcon.classList.remove('hidden');
-        } else {
-            // Light mode → hiện mặt trăng
-            if (darkIcon) darkIcon.classList.remove('hidden');
-            if (lightIcon) lightIcon.classList.add('hidden');
-        }
-    }
-
-    // Khởi tạo theme
-    if (localStorage.getItem('theme') === 'dark' ||
-        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        htmlElement.classList.add('dark');
-    } else {
-        htmlElement.classList.remove('dark');
-    }
-
-    updateThemeIcon();
-
-    // Sự kiện click
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function () {
-            htmlElement.classList.toggle('dark');
-            localStorage.setItem('theme', htmlElement.classList.contains('dark') ? 'dark' : 'light');
-            updateThemeIcon();
-        });
-    }
-});
-
 // ==================== XỬ LÝ VĂN BẢN ====================
 
 // Chuẩn hoá Ё → Е
@@ -48,7 +8,9 @@ function normalizeRussianText(text) {
 // Bảng chữ cái tiếng Nga (33 chữ, không có Ё)
 const RUSSIAN_ALPHABET = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 const RUSSIAN_ALPHABET_LOWER = 'абвгдежзийклмнопрстуфхцчшщъыьэюя';
-const VALID_CHARS = RUSSIAN_ALPHABET + RUSSIAN_ALPHABET_LOWER + '1234567890.,';
+
+// CHỈ chấp nhận А-Я và dấu cách (bỏ 0-9, dấu . và ,)
+const VALID_CHARS = RUSSIAN_ALPHABET + RUSSIAN_ALPHABET_LOWER + ' ';
 
 function processInput(text) {
     let result = normalizeRussianText(text);
@@ -150,9 +112,12 @@ function handleTextInput(text, showAlert = true) {
     if (showAlert) {
         for (let char of upperText) {
             if (char === ' ' || char === '\n' || char === '\t') continue;
-            if (!isValidChar(char) && !RUSSIAN_ALPHABET.includes(char) && !RUSSIAN_ALPHABET_LOWER.includes(char)) {
-                showMessage(`Ký tự "${char}" không hợp lệ! Chỉ chấp nhận chữ cái А-Я, số 0-9, dấu . và ,`, 'error');
-                return text.toUpperCase();
+            if (!RUSSIAN_ALPHABET.includes(char)) {
+                showMessage(`Ký tự "${char}" không hợp lệ! Chỉ chấp nhận chữ cái А-Я và dấu cách`, 'error');
+                // Lọc bỏ ký tự không hợp lệ
+                return upperText.split('').filter(c =>
+                    c === ' ' || c === '\n' || c === '\t' || RUSSIAN_ALPHABET.includes(c)
+                ).join('');
             }
         }
     }

@@ -4,7 +4,7 @@ const POLYBIUS_GRID = [
     ['М', 'Н', 'О', 'П', 'Р', 'С'],
     ['Т', 'У', 'Ф', 'Х', 'Ц', 'Ч'],
     ['Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э'],
-    ['Ю', 'Я', '-', '-', '-', '-']
+    ['Ю', 'Я', '–', '–', '–', '–']
 ];
 
 const charToCoords = {};
@@ -15,12 +15,14 @@ for (let row = 0; row < 6; row++) {
         const char = POLYBIUS_GRID[row][col];
         const key = `${row + 1}${col + 1}`;
         charToCoords[char] = key;
-        if (char !== '-') {
+        if (char !== '–') {
             charToCoords[char.toLowerCase()] = key;
         }
         coordsToChar[key] = char;
     }
 }
+
+const INVALID_PAIRS = ['63', '64', '65', '66'];
 
 function polybiusEncrypt(text) {
     const processed = GrassEAD.processInput(text);
@@ -37,57 +39,194 @@ function polybiusEncrypt(text) {
 
 function polybiusDecrypt(text) {
     let result = '';
-
-    // Lọc chỉ lấy số và dấu cách
-    const cleanText = text.replace(/[^0-9\s]/g, '');
-
-    // Kiểm tra số không hợp lệ (7,8,9,0)
-    const invalidNumbers = cleanText.match(/[7-9]/g);
-    if (invalidNumbers) {
-        const invalidChars = [...new Set(invalidNumbers)].join(', ');
-        GrassEAD.showMessage(`Số không hợp lệ: ${invalidChars}. Chỉ chấp nhận số 1-6!`, 'error');
-        // Loại bỏ các số không hợp lệ và tiếp tục
-        const filteredText = cleanText.replace(/[7-9]/g, '').replace(/0/g, '');
-        const pairs = filteredText.match(/\d\d/g);
-        if (!pairs) return text;
-        for (let pair of pairs) {
-            if (coordsToChar[pair]) {
-                result += coordsToChar[pair];
-            } else {
-                result += pair;
-            }
-        }
-        return result;
-    }
-
-    // Kiểm tra số 0
-    const zeroNumbers = cleanText.match(/0/g);
-    if (zeroNumbers) {
-        GrassEAD.showMessage('Số 0 không hợp lệ! Chỉ chấp nhận số 1-6!', 'error');
-        const filteredText = cleanText.replace(/0/g, '');
-        const pairs = filteredText.match(/\d\d/g);
-        if (!pairs) return text;
-        for (let pair of pairs) {
-            if (coordsToChar[pair]) {
-                result += coordsToChar[pair];
-            } else {
-                result += pair;
-            }
-        }
-        return result;
-    }
-
-    // Xử lý bình thường
+    const cleanText = text.replace(/[^0-9]/g, '');
     const pairs = cleanText.match(/\d\d/g);
-    if (!pairs) return text;
+    if (!pairs) return '';
     for (let pair of pairs) {
-        if (coordsToChar[pair]) {
+        if (coordsToChar[pair] && coordsToChar[pair] !== '–') {
             result += coordsToChar[pair];
         } else {
-            result += pair;
+            result += '–';
         }
     }
     return result;
+}
+
+// Lấy danh sách items cho bảng chi tiết
+function getDetailItems() {
+    const input = document.getElementById('polybius-input');
+    if (!input) return [];
+    const text = input.value;
+    if (!text || text.trim() === '') return [];
+
+    const items = [];
+
+    if (currentModeGlobal === 'encrypt') {
+        const processed = GrassEAD.processInput(text);
+        for (let char of processed) {
+            if (char === ' ') continue;
+            const pair = charToCoords[char] || '';
+            items.push({ input: char, output: pair, isInvalid: false });
+        }
+    } else {
+        const cleanText = text.replace(/[^0-9]/g, '');
+        const pairs = cleanText.match(/\d\d/g) || [];
+        for (let pair of pairs) {
+            const isInvalid = INVALID_PAIRS.includes(pair);
+            const char = coordsToChar[pair];
+            const output = (char && char !== '–') ? char : '–';
+            items.push({ input: pair, output: output, isInvalid: isInvalid });
+        }
+    }
+
+    return items;
+}
+
+// Render bảng chi tiết (ngang)
+function renderDetailHorizontal() {
+    const container = document.getElementById('polybius-detail');
+    if (!container) return;
+
+    const items = getDetailItems();
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-info-circle text-xl mb-2 block"></i>
+                <p class="text-sm">Nhập văn bản để xem chi tiết từng ký tự</p>
+            </div>
+        `;
+        return;
+    }
+
+    const isEncrypt = currentModeGlobal === 'encrypt';
+    const label1 = isEncrypt ? 'Gốc' : 'Mã hoá';
+    const label2 = isEncrypt ? 'Mã hoá' : 'Gốc';
+
+    let html = `
+        <div class="overflow-x-auto pb-3">
+            <table class="table-encrypt">
+                <thead>
+                    <tr>
+                        <th class="bg-green-100 dark:bg-green-900/30 min-w-[60px] sticky left-0 z-20">Vị trí</th>
+    `;
+
+    items.forEach((item, index) => {
+        html += `
+            <th class="${item.isInvalid ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'} min-w-[70px]">
+                ${index + 1}
+            </th>
+        `;
+    });
+
+    html += `</tr></thead><tbody>`;
+
+    // Hàng 1: input (label sticky)
+    html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[60px]">${label1}</td>`;
+    items.forEach(item => {
+        if (item.isInvalid) {
+            html += `
+                <td class="font-mono font-bold text-red-600 dark:text-red-400 text-center text-base">
+                    ${item.input}
+                </td>
+            `;
+        } else {
+            html += `
+                <td class="font-mono font-bold text-gray-900 dark:text-white text-center text-base">
+                    ${item.input}
+                </td>
+            `;
+        }
+    });
+    html += `</tr>`;
+
+    // Hàng 2: output (label sticky) — màu text-green-600
+    html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[60px]">${label2}</td>`;
+    items.forEach(item => {
+        if (item.isInvalid) {
+            html += `
+                <td class="font-bold text-red-600 dark:text-red-400 text-center text-base">
+                    ${item.output}
+                </td>
+            `;
+        } else {
+            html += `
+                <td class="font-bold text-green-600 dark:text-green-400 text-center text-base">
+                    ${item.output}
+                </td>
+            `;
+        }
+    });
+    html += `</tr>`;
+
+    container.innerHTML = html;
+}
+
+// Render bảng chi tiết (dọc)
+function renderDetailVertical() {
+    const container = document.getElementById('polybius-detail');
+    if (!container) return;
+
+    const items = getDetailItems();
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-info-circle text-xl mb-2 block"></i>
+                <p class="text-sm">Nhập văn bản để xem chi tiết từng ký tự</p>
+            </div>
+        `;
+        return;
+    }
+
+    const isEncrypt = currentModeGlobal === 'encrypt';
+    const label1 = isEncrypt ? 'Gốc' : 'Mã hoá';
+    const label2 = isEncrypt ? 'Mã hoá' : 'Gốc';
+
+    let html = `
+        <div class="overflow-y-auto max-h-[500px] rounded-lg">
+            <table class="table-encrypt">
+                <thead class="sticky top-0">
+                    <tr>
+                        <th class="bg-green-100 dark:bg-green-900/30 min-w-[60px]">Vị trí</th>
+                        <th class="bg-green-100 dark:bg-green-900/30 min-w-[90px]">${label1}</th>
+                        <th class="bg-green-100 dark:bg-green-900/30 min-w-[90px]">${label2}</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    items.forEach((item, index) => {
+        if (item.isInvalid) {
+            html += `
+                <tr class="bg-red-50 dark:bg-red-900/20">
+                    <td class="font-bold text-gray-900 dark:text-white text-center">${index + 1}</td>
+                    <td class="font-mono font-bold text-red-600 dark:text-red-400 text-center">${item.input}</td>
+                    <td class="font-bold text-red-600 dark:text-red-400 text-center">
+                        ${item.output}
+                    </td>
+                </tr>
+            `;
+        } else {
+            html += `
+                <tr>
+                    <td class="font-bold text-gray-900 dark:text-white text-center">${index + 1}</td>
+                    <td class="font-mono font-bold text-gray-900 dark:text-white text-center">${item.input}</td>
+                    <td class="font-bold text-green-600 dark:text-green-400 text-center">${item.output}</td>
+                </tr>
+            `;
+        }
+    });
+
+    container.innerHTML = html;
+}
+
+function renderDetailTable() {
+    if (isVertical) {
+        renderDetailVertical();
+    } else {
+        renderDetailHorizontal();
+    }
 }
 
 // Render bảng Polybius 6x6
@@ -96,14 +235,13 @@ function renderPolybiusGrid() {
     if (!container) return;
 
     let html = `
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto pb-1">
             <table class="table-encrypt">
                 <thead>
                     <tr>
                          <th class="bg-green-100 dark:bg-green-900/30"></th>
     `;
 
-    // Header cột: số 1-6 giống style của số hàng
     for (let col = 1; col <= 6; col++) {
         html += `<th class="bg-green-100 dark:bg-green-900/30 font-bold text-black dark:text-white text-center text-sm">${col}</th>`;
     }
@@ -111,16 +249,18 @@ function renderPolybiusGrid() {
 
     for (let row = 0; row < 6; row++) {
         html += `<tr>`;
-        // Số hàng: giữ nguyên làm chuẩn
         html += `<td class="font-bold bg-green-100 dark:bg-green-900/30 text-center text-black dark:text-white">${row + 1}</td>`;
 
         for (let col = 0; col < 6; col++) {
             const char = POLYBIUS_GRID[row][col];
-            const isSpecial = char === '-';
+            const isSpecial = char === '–';
+            const cellKey = `${row + 1}${col + 1}`;
+            const isInvalid = isSpecial;
+
             html += `
-                <td class="${isSpecial ? 'text-gray-400 dark:text-gray-600' : 'font-bold text-black dark:text-white'} text-center">
+                <td class="font-bold ${isInvalid ? 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400' : 'text-black dark:text-white'} text-center">
                     ${char}
-                    ${!isSpecial ? `<span class="text-xs text-gray-500 dark:text-gray-400 block">${row + 1}${col + 1}</span>` : ''}
+                    <span class="text-xs ${isInvalid ? 'text-red-400 dark:text-red-500' : 'text-gray-500 dark:text-gray-400'} block">${cellKey}</span>
                 </td>
             `;
         }
@@ -144,6 +284,9 @@ function renderPolybiusGrid() {
     container.innerHTML = html;
 }
 
+let currentModeGlobal = 'encrypt';
+let isVertical = false;
+
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('polybius-input');
     const output = document.getElementById('polybius-output');
@@ -151,12 +294,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const outputLabel = document.getElementById('output-label');
     const modeEncrypt = document.getElementById('mode-encrypt');
     const modeDecrypt = document.getElementById('mode-decrypt');
+    const viewToggle = document.getElementById('view-toggle');
+    const detailViewLabel = document.getElementById('detail-view-label');
     const pasteBtn = document.getElementById('paste-btn');
     const copyInputBtn = document.getElementById('copy-input-btn');
     const copyOutputBtn = document.getElementById('copy-output-btn');
     const clearBtn = document.getElementById('clear-btn');
 
     let currentMode = 'encrypt';
+    currentModeGlobal = currentMode;
 
     function updateUI() {
         const isEncrypt = currentMode === 'encrypt';
@@ -170,34 +316,95 @@ document.addEventListener('DOMContentLoaded', function () {
         if (input) {
             input.placeholder = isEncrypt
                 ? 'Nhập văn bản tiếng Nga cần mã hoá (ví dụ: ПРИВЕТ)'
-                : 'Nhập văn bản đã mã hoá (ví dụ: 33353 42326 33332 6)';
+                : 'Nhập các cặp số 1-6 (ví dụ: 33 35 34 23 26)';
         }
 
         if (modeEncrypt && modeDecrypt) {
             if (isEncrypt) {
-                modeEncrypt.className = 'px-4 py-2 bg-purple-600 border-2 border-purple-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-teal-500 text-teal-500 dark:text-teal-400 rounded-lg text-sm font-medium transition-colors hover:bg-teal-50 dark:hover:bg-teal-900/20';
+                modeEncrypt.className = 'px-4 py-2 bg-red-500 border-2 border-red-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-blue-400 text-blue-500 dark:text-blue-400 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20';
             } else {
-                modeDecrypt.className = 'px-4 py-2 bg-teal-500 border-2 border-teal-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-purple-500 text-purple-500 dark:text-purple-400 rounded-lg text-sm font-medium transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20';
+                modeDecrypt.className = 'px-4 py-2 bg-blue-500 border-2 border-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-red-400 text-red-500 dark:text-red-400 rounded-lg text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20';
             }
         }
+
+        if (viewToggle) {
+            viewToggle.innerHTML = isVertical
+                ? '<i class="fas fa-sync-alt mr-2"></i>Xem ngang'
+                : '<i class="fas fa-sync-alt mr-2"></i>Xem dọc';
+        }
+        if (detailViewLabel) {
+            detailViewLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
+        }
+    }
+
+    function processDecryptInput(rawText, cursorPos) {
+        const digits = [];
+        const invalidChars = [];
+
+        for (let char of rawText) {
+            if (char >= '1' && char <= '6') {
+                digits.push(char);
+            } else if (char >= '0' && char <= '9') {
+                invalidChars.push(char);
+            }
+        }
+
+        if (invalidChars.length > 0) {
+            const uniqueInvalid = [...new Set(invalidChars)].join(', ');
+            GrassEAD.showMessage(
+                `Số "${uniqueInvalid}" không hợp lệ. Chỉ chấp nhận số 1-6!`,
+                'error'
+            );
+        }
+
+        let formatted = '';
+        for (let i = 0; i < digits.length; i++) {
+            formatted += digits[i];
+            if (i % 2 === 1 && i < digits.length - 1) {
+                formatted += ' ';
+            }
+        }
+
+        let digitsBeforeCursor = 0;
+        for (let i = 0; i < cursorPos && i < rawText.length; i++) {
+            if (rawText[i] >= '1' && rawText[i] <= '6') {
+                digitsBeforeCursor++;
+            }
+        }
+
+        let newCursorPos = 0;
+        let digitsSeen = 0;
+        for (let i = 0; i < formatted.length; i++) {
+            if (digitsSeen === digitsBeforeCursor) {
+                newCursorPos = i;
+                break;
+            }
+            if (formatted[i] >= '1' && formatted[i] <= '6') {
+                digitsSeen++;
+            }
+            newCursorPos = i + 1;
+        }
+        if (digitsBeforeCursor >= digits.length) {
+            newCursorPos = formatted.length;
+        }
+
+        return { formatted, cursorPos: newCursorPos };
     }
 
     function handleInput(event) {
         const text = event.target.value;
 
         if (currentMode === 'decrypt') {
-            // Chế độ giải mã: chỉ cho phép số, dấu cách, dấu phẩy
-            let processed = text.replace(/,/g, ' ');
-            processed = processed.replace(/[^0-9\s]/g, '');
-
-            if (processed !== text) {
-                event.target.value = processed;
+            const cursorPos = event.target.selectionStart;
+            const { formatted, cursorPos: newCursorPos } = processDecryptInput(text, cursorPos);
+            if (formatted !== text) {
+                event.target.value = formatted;
+                event.target.setSelectionRange(newCursorPos, newCursorPos);
             }
             updateOutput();
         } else {
-            // Chế độ mã hoá: xử lý như bình thường
             const processed = GrassEAD.handleTextInput(text, true);
             if (processed !== text) {
                 event.target.value = processed;
@@ -212,35 +419,35 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!text) {
             output.value = '';
             renderPolybiusGrid();
+            renderDetailTable();
             return;
         }
         let result;
         if (currentMode === 'encrypt') {
             result = polybiusEncrypt(text);
         } else {
-            const cleanText = text.replace(/,/g, ' ');
-            result = polybiusDecrypt(cleanText);
+            result = polybiusDecrypt(text);
         }
         output.value = result;
         renderPolybiusGrid();
+        renderDetailTable();
     }
 
     if (input) {
         input.addEventListener('input', handleInput);
+
         input.addEventListener('paste', function (e) {
             setTimeout(() => {
                 const text = this.value;
 
                 if (currentMode === 'decrypt') {
-                    // Chế độ giải mã
-                    let processed = text.replace(/,/g, ' ');
-                    processed = processed.replace(/[^0-9\s]/g, '');
-
-                    if (processed !== text) {
-                        this.value = processed;
+                    const cursorPos = this.selectionStart;
+                    const { formatted, cursorPos: newCursorPos } = processDecryptInput(text, cursorPos);
+                    if (formatted !== text) {
+                        this.value = formatted;
+                        this.setSelectionRange(newCursorPos, newCursorPos);
                     }
                 } else {
-                    // Chế độ mã hoá
                     const processed = GrassEAD.handleTextInput(text, true);
                     if (processed !== text) {
                         this.value = processed;
@@ -255,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modeEncrypt.addEventListener('click', function () {
             if (currentMode !== 'encrypt') {
                 currentMode = 'encrypt';
-                // Xoá input khi chuyển mode
+                currentModeGlobal = currentMode;
                 if (input) input.value = '';
                 if (output) output.value = '';
                 updateUI();
@@ -268,12 +475,20 @@ document.addEventListener('DOMContentLoaded', function () {
         modeDecrypt.addEventListener('click', function () {
             if (currentMode !== 'decrypt') {
                 currentMode = 'decrypt';
-                // Xoá input khi chuyển mode
+                currentModeGlobal = currentMode;
                 if (input) input.value = '';
                 if (output) output.value = '';
                 updateUI();
                 updateOutput();
             }
+        });
+    }
+
+    if (viewToggle) {
+        viewToggle.addEventListener('click', function () {
+            isVertical = !isVertical;
+            updateUI();
+            renderDetailTable();
         });
     }
 

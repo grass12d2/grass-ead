@@ -2,6 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==================== CUSTOM SCROLLBAR ==================== */
+
+/* --- Textarea input/output (.input-area) --- */
+.input-area {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark .input-area {
+  scrollbar-color: #4b5563 transparent;
+}
+
+.input-area::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.input-area::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+  margin: 0 4px;
+}
+
+.dark .input-area::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.input-area::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+.dark .input-area::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.input-area::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: padding-box;
+}
+
+.dark .input-area::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+  background-clip: padding-box;
+}
+
+.input-area::-webkit-scrollbar-thumb:active {
+  background: #64748b;
+  background-clip: padding-box;
+}
+
+.dark .input-area::-webkit-scrollbar-thumb:active {
+  background: #9ca3af;
+  background-clip: padding-box;
+}
+
+.input-area::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* --- Bảng cuộn ngang/dọc/tự động (overflow-x-auto, overflow-y-auto, overflow-auto) --- */
+.overflow-x-auto,
+.overflow-y-auto,
+.overflow-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark .overflow-x-auto,
+.dark .overflow-y-auto,
+.dark .overflow-auto {
+  scrollbar-color: #4b5563 transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track,
+.overflow-y-auto::-webkit-scrollbar-track,
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+  margin: 0 4px;
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-track,
+.dark .overflow-y-auto::-webkit-scrollbar-track,
+.dark .overflow-auto::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb,
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-thumb,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb,
+.dark .overflow-auto::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover,
+.overflow-y-auto::-webkit-scrollbar-thumb:hover,
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: padding-box;
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+.dark .overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+  background-clip: padding-box;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:active,
+.overflow-y-auto::-webkit-scrollbar-thumb:active,
+.overflow-auto::-webkit-scrollbar-thumb:active {
+  background: #64748b;
+  background-clip: padding-box;
+}
+
+.dark .overflow-x-auto::-webkit-scrollbar-thumb:active,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:active,
+.dark .overflow-auto::-webkit-scrollbar-thumb:active {
+  background: #9ca3af;
+  background-clip: padding-box;
+}
+
+.overflow-x-auto::-webkit-scrollbar-corner,
+.overflow-y-auto::-webkit-scrollbar-corner,
+.overflow-auto::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @layer base {
 
   html,

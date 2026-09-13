@@ -1,0 +1,251 @@
+<!-- ==================== DRAWER SIDEBAR ==================== -->
+<!-- Backdrop -->
+<div id="tools-backdrop"
+    class="fixed left-0 right-0 bottom-0 bg-gray-900/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300"
+    style="top: var(--navbar-height, 64px);">
+</div>
+
+<!-- Drawer -->
+<aside id="tools-drawer"
+    class="fixed left-0 z-50 w-[460px] max-w-[92vw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-2xl -translate-x-full transition-transform duration-300 ease-out flex flex-col overflow-hidden"
+    style="top: var(--navbar-height, 64px); height: calc(100vh - var(--navbar-height, 64px));" tabindex="-1"
+    aria-labelledby="tools-drawer-label">
+
+    <!-- ===== Header ===== -->
+    <div class="flex-shrink-0 relative overflow-hidden">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-amber-50 via-amber-50 to-orange-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
+        </div>
+        <div
+            class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-300/40 dark:bg-amber-500/10 blur-2xl pointer-events-none">
+        </div>
+
+        <div class="relative px-5 pt-5 pb-5 border-b border-amber-200/60 dark:border-gray-700/60">
+            <div class="flex items-center justify-between">
+                <a href="/index.html" class="flex items-center gap-3 group">
+                    <span
+                        class="relative w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:shadow-amber-500/50 group-hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-shield-halved text-white text-lg"></i>
+                        <span class="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/20"></span>
+                    </span>
+                    <span class="flex flex-col leading-tight">
+                        <span id="tools-drawer-label"
+                            class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                            Grass EAD
+                        </span>
+                        <span
+                            class="text-[11px] uppercase tracking-[0.15em] text-amber-600 dark:text-amber-400 font-semibold">
+                            Menu chính
+                        </span>
+                    </span>
+                </a>
+
+                <button id="tools-close" type="button" aria-controls="tools-drawer" aria-label="Đóng menu"
+                    class="w-10 h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white active:scale-95 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md">
+                    <i class="fas fa-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Body (scroll) ===== -->
+    <div class="flex-1 overflow-y-auto px-4 py-5">
+
+        <!-- Section: Điều hướng -->
+        <p class="px-3 mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">
+            Điều hướng
+        </p>
+
+        <ul class="space-y-1.5">
+
+            <!-- Trang chủ -->
+            <li>
+                <a href="/index.html"
+                    class="relative flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-200 rounded-xl hover:bg-amber-50 dark:hover:bg-gray-800 hover:text-amber-700 dark:hover:text-amber-400 transition-all duration-200 group">
+                    <span
+                        class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 dark:group-hover:bg-amber-500/25 group-hover:scale-110 transition-all duration-200">
+                        <i class="fas fa-house text-amber-600 dark:text-amber-400"></i>
+                    </span>
+                    <span class="flex-1">Trang chủ</span>
+                    <i
+                        class="fas fa-arrow-right text-xs text-gray-300 dark:text-gray-600 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-amber-500 transition-all duration-200"></i>
+                </a>
+            </li>
+
+            <!-- Nhóm: Thuật toán -->
+            <li>
+                <button type="button" id="algorithms-toggle" aria-controls="algorithms-list" aria-expanded="false"
+                    class="w-full flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-200 rounded-xl hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-all duration-200 group">
+                    <span
+                        class="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-200 dark:group-hover:bg-violet-500/25 group-hover:scale-110 transition-all duration-200">
+                        <i class="fas fa-shield-halved text-violet-600 dark:text-violet-400"></i>
+                    </span>
+                    <span class="flex-1 text-left">Thuật toán</span>
+                    <i id="algorithms-chevron"
+                        class="fas fa-chevron-down w-3.5 text-xs text-gray-400 group-hover:text-violet-500 transition-transform duration-300"></i>
+                </button>
+
+                <ul id="algorithms-list"
+                    class="hidden mt-2 ms-4 ps-4 border-l-2 border-gray-100 dark:border-gray-800 space-y-1">
+                    <li>
+                        <a href="/pages/caesar.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-arrow-right-arrow-left text-blue-600 dark:text-blue-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Caesar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/atbash.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10 hover:text-fuchsia-700 dark:hover:text-fuchsia-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-fuchsia-100 dark:bg-fuchsia-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-retweet text-fuchsia-600 dark:text-fuchsia-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Atbash</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/polybius.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-table-cells text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Polybius</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/trithemius.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-700 dark:hover:text-indigo-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-chart-line text-indigo-600 dark:text-indigo-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Trithemius</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/bellaso.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-pink-50 dark:hover:bg-pink-500/10 hover:text-pink-700 dark:hover:text-pink-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-pink-100 dark:bg-pink-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-key text-pink-600 dark:text-pink-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Bellaso</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/vigenere-autokey.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-700 dark:hover:text-orange-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-orange-100 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-lock text-orange-600 dark:text-orange-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Vigenère Autokey</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/pages/vigenere-ctkey.html"
+                            class="group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-500/10 hover:text-cyan-700 dark:hover:text-cyan-300 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-cyan-100 dark:bg-cyan-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-lock-open text-cyan-600 dark:text-cyan-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1">Vigenère Ciphertext</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+        </ul>
+
+        <!-- Section: Công cụ -->
+        <p class="px-3 mt-7 mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">
+            Công cụ
+        </p>
+
+        <ul class="space-y-1.5">
+
+            <!-- Tiện ích -->
+            <li>
+                <button type="button" id="utilities-toggle" aria-controls="utilities-list" aria-expanded="false"
+                    class="w-full flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-200 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-300 transition-all duration-200 group">
+                    <span
+                        class="w-9 h-9 rounded-lg bg-rose-100 dark:bg-rose-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-rose-200 dark:group-hover:bg-rose-500/25 group-hover:scale-110 transition-all duration-200">
+                        <i class="fas fa-wand-magic-sparkles text-rose-600 dark:text-rose-400"></i>
+                    </span>
+                    <span class="flex-1 text-left">Tiện ích</span>
+                    <i id="utilities-chevron"
+                        class="fas fa-chevron-down w-3.5 text-xs text-gray-400 group-hover:text-rose-500 transition-transform duration-300"></i>
+                </button>
+
+                <ul id="utilities-list"
+                    class="hidden mt-2 ms-4 ps-4 border-l-2 border-gray-100 dark:border-gray-800 space-y-1">
+                    <li>
+                        <button id="tool-clear" type="button"
+                            class="w-full group flex items-center gap-3 px-3 py-2.5 text-[15px] text-gray-600 dark:text-gray-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 hover:translate-x-0.5 transition-all duration-200">
+                            <span
+                                class="w-8 h-8 rounded-md bg-red-100 dark:bg-red-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-broom text-red-600 dark:text-red-400 text-xs"></i>
+                            </span>
+                            <span class="flex-1 text-left">Xoá dữ liệu tạm</span>
+                        </button>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Thông tin -->
+            <li>
+                <button type="button" id="info-toggle" aria-controls="info-list" aria-expanded="false"
+                    class="w-full flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-200 rounded-xl hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-700 dark:hover:text-sky-300 transition-all duration-200 group">
+                    <span
+                        class="w-9 h-9 rounded-lg bg-sky-100 dark:bg-sky-500/15 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-200 dark:group-hover:bg-sky-500/25 group-hover:scale-110 transition-all duration-200">
+                        <i class="fas fa-circle-info text-sky-600 dark:text-sky-400"></i>
+                    </span>
+                    <span class="flex-1 text-left">Thông tin</span>
+                    <i id="info-chevron"
+                        class="fas fa-chevron-down w-3.5 text-xs text-gray-400 group-hover:text-sky-500 transition-transform duration-300"></i>
+                </button>
+
+                <ul id="info-list"
+                    class="hidden mt-2 ms-4 ps-4 border-l-2 border-gray-100 dark:border-gray-800 space-y-1.5 py-2">
+                    <li class="flex items-start gap-3 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-right-left text-blue-500 mt-0.5 w-4 text-center flex-shrink-0 text-xs"></i>
+                        <span class="flex-1 leading-relaxed">Ё tự động chuyển thành Е</span>
+                    </li>
+                    <li class="flex items-start gap-3 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-circle text-green-500 mt-0.5 w-4 text-center flex-shrink-0 text-[7px]"></i>
+                        <span class="flex-1 leading-relaxed">Kết quả chia cụm 5 ký tự</span>
+                    </li>
+                    <li class="flex items-start gap-3 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-font text-purple-500 mt-0.5 w-4 text-center flex-shrink-0 text-xs"></i>
+                        <span class="flex-1 leading-relaxed">Chỉ chấp nhận А-Я</span>
+                    </li>
+                    <li class="flex items-start gap-3 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-keyboard text-amber-500 mt-0.5 w-4 text-center flex-shrink-0 text-xs"></i>
+                        <span class="flex-1 leading-relaxed">Dấu cách được bỏ qua</span>
+                    </li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- ===== Footer ===== -->
+    <div class="flex-shrink-0 relative overflow-hidden border-t border-gray-200 dark:border-gray-700">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-amber-50 via-amber-50/70 to-orange-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900">
+        </div>
+        <div class="relative px-4 py-3.5 text-center">
+            <p class="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                © <span class="current-year"></span> Grass EAD
+            </p>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 flex items-center justify-center gap-1">
+                Made with <i class="fas fa-heart text-red-500 text-[10px] animate-pulse"></i> by Grass
+            </p>
+        </div>
+    </div>
+</aside>

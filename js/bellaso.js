@@ -7,25 +7,19 @@ function bellasoEncrypt(text, key = 'ТРАВА') {
     const len = upper.length;
 
     let normalizedKey = key.toUpperCase();
-    normalizedKey = normalizedKey.replace(/[^А-Я0-9]/g, '');
+    normalizedKey = normalizedKey.replace(/[^А-Я]/g, '');
     if (normalizedKey.length === 0) normalizedKey = 'ТРАВА';
 
     let keyIndex = 0;
     for (let char of processed) {
-        // Nếu là dấu cách, giữ nguyên và KHÔNG tăng keyIndex
         if (char === ' ') {
             result += ' ';
             continue;
         }
 
         const keyChar = normalizedKey[keyIndex % normalizedKey.length];
-        let shift;
-        if (keyChar >= '0' && keyChar <= '9') {
-            shift = parseInt(keyChar);
-        } else {
-            shift = upper.indexOf(keyChar);
-            if (shift === -1) shift = 0;
-        }
+        let shift = upper.indexOf(keyChar);
+        if (shift === -1) shift = 0;
         keyIndex++;
 
         if (upper.includes(char)) {
@@ -50,25 +44,19 @@ function bellasoDecrypt(text, key = 'ТРАВА') {
     const len = upper.length;
 
     let normalizedKey = key.toUpperCase();
-    normalizedKey = normalizedKey.replace(/[^А-Я0-9]/g, '');
+    normalizedKey = normalizedKey.replace(/[^А-Я]/g, '');
     if (normalizedKey.length === 0) normalizedKey = 'ТРАВА';
 
     let keyIndex = 0;
     for (let char of processed) {
-        // Nếu là dấu cách, giữ nguyên và KHÔNG tăng keyIndex
         if (char === ' ') {
             result += ' ';
             continue;
         }
 
         const keyChar = normalizedKey[keyIndex % normalizedKey.length];
-        let shift;
-        if (keyChar >= '0' && keyChar <= '9') {
-            shift = parseInt(keyChar);
-        } else {
-            shift = upper.indexOf(keyChar);
-            if (shift === -1) shift = 0;
-        }
+        let shift = upper.indexOf(keyChar);
+        if (shift === -1) shift = 0;
         keyIndex++;
 
         if (upper.includes(char)) {
@@ -92,7 +80,7 @@ function generateBellasoTable(text, key = 'ТРАВА', isDecrypt = false) {
     let cleanText = text.replace(/\s/g, '');
 
     let normalizedKey = key.toUpperCase();
-    normalizedKey = normalizedKey.replace(/[^А-Я0-9]/g, '');
+    normalizedKey = normalizedKey.replace(/[^А-Я]/g, '');
     if (normalizedKey.length === 0) normalizedKey = 'ТРАВА';
 
     if (cleanText.length === 0) {
@@ -102,21 +90,11 @@ function generateBellasoTable(text, key = 'ТРАВА', isDecrypt = false) {
     for (let i = 0; i < cleanText.length; i++) {
         const inputChar = cleanText[i] || '';
         const keyChar = normalizedKey[i % normalizedKey.length];
-        let shift;
-        let keyType;
-
-        if (keyChar >= '0' && keyChar <= '9') {
-            shift = parseInt(keyChar);
-            keyType = 'Số';
-        } else {
-            shift = upper.indexOf(keyChar);
-            if (shift === -1) shift = 0;
-            keyType = 'Chữ';
-        }
+        let shift = upper.indexOf(keyChar);
+        if (shift === -1) shift = 0;
 
         let outputChar = '';
         if (isDecrypt) {
-            // Giải mã: input là ký tự mã hoá, output là ký tự gốc
             if (upper.includes(inputChar)) {
                 const index = upper.indexOf(inputChar);
                 outputChar = upper[(index - shift + upper.length) % upper.length];
@@ -124,7 +102,6 @@ function generateBellasoTable(text, key = 'ТРАВА', isDecrypt = false) {
                 outputChar = inputChar;
             }
         } else {
-            // Mã hoá: input là ký tự gốc, output là ký tự mã hoá
             if (upper.includes(inputChar)) {
                 const index = upper.indexOf(inputChar);
                 outputChar = upper[(index + shift) % upper.length];
@@ -133,16 +110,15 @@ function generateBellasoTable(text, key = 'ТРАВА', isDecrypt = false) {
             }
         }
 
-        // Tính giá trị alphabet của inputChar và outputChar
-        const inputValue = upper.includes(inputChar) ? upper.indexOf(inputChar) : '-';
-        const outputValue = upper.includes(outputChar) ? upper.indexOf(outputChar) : '-';
+        const inputValue = upper.includes(inputChar) ? upper.indexOf(inputChar) + 1 : '-';
+        const outputValue = upper.includes(outputChar) ? upper.indexOf(outputChar) + 1 : '-';
 
         table.push({
             position: i + 1,
             inputChar: inputChar,
             inputValue: inputValue,
             keyChar: keyChar,
-            keyType: keyType,
+            keyType: 'Chữ',
             shift: shift,
             outputChar: outputChar,
             outputValue: outputValue
@@ -171,21 +147,12 @@ function renderBellasoTableHorizontal(text = '', key = 'ТРАВА', isDecrypt =
 
     const table = generateBellasoTable(text, key, isDecrypt);
 
-    const formula = isDecrypt
-        ? 'Gốc = [(Mã hoá - Shift) mod 32 + 32] mod 32'
-        : 'Mã hoá = [Văn bản + Shift] mod 32';
-
     let html = `
-        <div class="overflow-x-auto">
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                <span class="font-medium">📌 Công thức:</span>
-                <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${formula}</span>
-                <span class="ml-2 text-xs text-gray-500">(Khoá: <span class="font-bold text-pink-600 dark:text-pink-400">${key || 'ТРАВА'}</span>)</span>
-            </div>
+        <div class="overflow-x-auto pb-3">
             <table class="table-encrypt">
                 <thead>
                     <tr>
-                        <th class="bg-pink-100 dark:bg-pink-900/30 min-w-[60px]">Vị trí</th>
+                        <th class="bg-pink-100 dark:bg-pink-900/30 min-w-[80px] sticky left-0 z-20">Vị trí</th>
     `;
 
     table.forEach(row => {
@@ -199,13 +166,11 @@ function renderBellasoTableHorizontal(text = '', key = 'ТРАВА', isDecrypt =
     html += `</tr></thead><tbody>`;
 
     if (isDecrypt) {
-        // CHẾ ĐỘ GIẢI MÃ: Mã hoá → Khoá (shift) → Gốc
-
-        // HÀNG 1: Mã hoá (có giá trị alphabet ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Mã hoá</td>`;
+        // Hàng "Mã hoá" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Mã hoá</td>`;
         table.forEach(row => {
             html += `
-                <td class="font-bold text-teal-600 dark:text-teal-400 text-center text-base">
+                <td class="font-bold text-purple-600 dark:text-purple-400 text-center text-base">
                     ${row.inputChar}
                     <span class="text-xs text-gray-500 dark:text-gray-400 block">${row.inputValue}</span>
                 </td>
@@ -213,21 +178,20 @@ function renderBellasoTableHorizontal(text = '', key = 'ТРАВА', isDecrypt =
         });
         html += `</tr>`;
 
-        // HÀNG 2: Shift (có shift ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Shift</td>`;
+        // Hàng "Shift" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Shift</td>`;
         table.forEach(row => {
-            const isNumber = row.keyType === 'Số';
             html += `
-                <td class="font-bold ${isNumber ? 'text-green-600 dark:text-green-400' : 'text-pink-600 dark:text-pink-400'} text-center text-base">
+                <td class="font-bold text-pink-600 dark:text-pink-400 text-center text-base">
                     ${row.keyChar}
-                    <span class="text-xs text-purple-600 dark:text-purple-400 block">-${row.shift}</span>
+                    <span class="text-xs block" style="color: rgb(241, 126, 184);">-${row.shift}</span>
                 </td>
             `;
         });
         html += `</tr>`;
 
-        // HÀNG 3: Gốc (có giá trị alphabet ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Gốc</td>`;
+        // Hàng "Gốc" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Gốc</td>`;
         table.forEach(row => {
             html += `
                 <td class="font-bold text-gray-900 dark:text-white text-center text-base">
@@ -238,10 +202,8 @@ function renderBellasoTableHorizontal(text = '', key = 'ТРАВА', isDecrypt =
         });
         html += `</tr>`;
     } else {
-        // CHẾ ĐỘ MÃ HOÁ: Văn bản → Khoá (shift) → Mã hoá
-
-        // HÀNG 1: Văn bản (có giá trị alphabet ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Văn bản</td>`;
+        // Hàng "Văn bản" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Gốc</td>`;
         table.forEach(row => {
             html += `
                 <td class="font-bold text-gray-900 dark:text-white text-center text-base">
@@ -252,24 +214,23 @@ function renderBellasoTableHorizontal(text = '', key = 'ТРАВА', isDecrypt =
         });
         html += `</tr>`;
 
-        // HÀNG 2: Khoá (có shift ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Shift</td>`;
+        // Hàng "Shift" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Shift</td>`;
         table.forEach(row => {
-            const isNumber = row.keyType === 'Số';
             html += `
-                <td class="font-bold ${isNumber ? 'text-green-600 dark:text-green-400' : 'text-pink-600 dark:text-pink-400'} text-center text-base">
+                <td class="font-bold text-pink-600 dark:text-pink-400 text-center text-base">
                     ${row.keyChar}
-                    <span class="text-xs text-purple-600 dark:text-purple-400 block">+${row.shift}</span>
+                    <span class="text-xs block" style="color: rgb(241, 126, 184);">+${row.shift}</span>
                 </td>
             `;
         });
         html += `</tr>`;
 
-        // HÀNG 3: Mã hoá (có giá trị alphabet ở dưới)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm">Mã hoá</td>`;
+        // Hàng "Mã hoá" — label sticky
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Mã hoá</td>`;
         table.forEach(row => {
             html += `
-                <td class="font-bold text-teal-600 dark:text-teal-400 text-center text-base">
+                <td class="font-bold text-purple-600 dark:text-purple-400 text-center text-base">
                     ${row.outputChar}
                     <span class="text-xs text-gray-500 dark:text-gray-400 block">${row.outputValue}</span>
                 </td>
@@ -307,19 +268,10 @@ function renderBellasoTableVertical(text = '', key = 'ТРАВА', isDecrypt = f
 
     const table = generateBellasoTable(text, key, isDecrypt);
 
-    const formula = isDecrypt
-        ? 'Gốc = [(Mã hoá - Shift) mod 32 + 32] mod 32'
-        : 'Mã hoá = [Văn bản + Shift] mod 32';
-
     let html = `
-        <div>
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                <span class="font-medium">📌 Công thức:</span>
-                <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">${formula}</span>
-                <span class="ml-2 text-xs text-gray-500">(Khoá: <span class="font-bold text-pink-600 dark:text-pink-400">${key || 'ТРАВА'}</span>)</span>
-            </div>
+        <div class="overflow-y-auto max-h-[500px] rounded-lg">
             <table class="table-encrypt">
-                <thead>
+                <thead class="sticky top-0">
                     <tr>
                         <th class="bg-pink-100 dark:bg-pink-900/30">Vị trí</th>
     `;
@@ -335,7 +287,7 @@ function renderBellasoTableVertical(text = '', key = 'ТРАВА', isDecrypt = f
         `;
     } else {
         html += `
-                        <th class="bg-pink-100 dark:bg-pink-900/30">Văn bản</th>
+                        <th class="bg-pink-100 dark:bg-pink-900/30">Gốc</th>
                         <th class="bg-pink-100 dark:bg-pink-900/30">Shift</th>
                         <th class="bg-pink-100 dark:bg-pink-900/30">Mã hoá</th>
                     </tr>
@@ -345,20 +297,19 @@ function renderBellasoTableVertical(text = '', key = 'ТРАВА', isDecrypt = f
     }
 
     table.forEach(row => {
-        const isNumber = row.keyType === 'Số';
         const shiftDisplay = isDecrypt ? `-${row.shift}` : `+${row.shift}`;
 
         if (isDecrypt) {
             html += `
                 <tr>
                     <td class="font-bold text-gray-900 dark:text-white text-center">${row.position}</td>
-                    <td class="font-bold text-teal-600 dark:text-teal-400 text-center">
+                    <td class="font-bold text-purple-600 dark:text-purple-400 text-center">
                         ${row.inputChar}
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">${row.inputValue}</span>
                     </td>
-                    <td class="font-bold ${isNumber ? 'text-green-600 dark:text-green-400' : 'text-pink-600 dark:text-pink-400'} text-center">
+                    <td class="font-bold text-pink-600 dark:text-pink-400 text-center">
                         ${row.keyChar}
-                        <span class="text-xs text-purple-600 dark:text-purple-400 block">${shiftDisplay}</span>
+                        <span class="text-xs block" style="color: rgb(241, 126, 184);">${shiftDisplay}</span>
                     </td>
                     <td class="font-bold text-gray-900 dark:text-white text-center">
                         ${row.outputChar}
@@ -374,11 +325,11 @@ function renderBellasoTableVertical(text = '', key = 'ТРАВА', isDecrypt = f
                         ${row.inputChar}
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">${row.inputValue}</span>
                     </td>
-                    <td class="font-bold ${isNumber ? 'text-green-600 dark:text-green-400' : 'text-pink-600 dark:text-pink-400'} text-center">
+                    <td class="font-bold text-pink-600 dark:text-pink-400 text-center">
                         ${row.keyChar}
-                        <span class="text-xs text-purple-600 dark:text-purple-400 block">${shiftDisplay}</span>
+                        <span class="text-xs block" style="color: rgb(241, 126, 184);">${shiftDisplay}</span>
                     </td>
-                    <td class="font-bold text-teal-600 dark:text-teal-400 text-center">
+                    <td class="font-bold text-purple-600 dark:text-purple-400 text-center">
                         ${row.outputChar}
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">${row.outputValue}</span>
                     </td>
@@ -410,26 +361,25 @@ function updateBellasoKeyInfo(key) {
     if (!container) return;
 
     let normalizedKey = key.toUpperCase();
-    normalizedKey = normalizedKey.replace(/[^А-Я0-9]/g, '');
+    normalizedKey = normalizedKey.replace(/[^А-Я]/g, '');
     if (normalizedKey.length === 0) normalizedKey = 'ТРАВА';
 
     const keyDisplay = normalizedKey.length > 20 ? normalizedKey.slice(0, 20) + '...' : normalizedKey;
     container.innerHTML = `
-        <div class="flex flex-wrap items-center gap-3 text-sm">
-            <span class="font-medium text-gray-700 dark:text-gray-300">🔑 Khoá:</span>
-            <span class="font-mono font-bold text-pink-600 dark:text-pink-400">${keyDisplay}</span>
-            <span class="text-gray-500 dark:text-gray-400">(${normalizedKey.length} ký tự)</span>
-            <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                Shift = Vị trí ký tự trong bảng chữ cái
-            </span>
-        </div>
-    `;
+    <div class="flex flex-wrap items-center gap-3 text-sm">
+        <span class="font-medium text-gray-700 dark:text-gray-300"><i class="fas fa-key text-pink-500 mr-1"></i>Khoá:</span>
+        <span class="font-mono font-bold text-pink-600 dark:text-pink-400">${keyDisplay}</span>
+        <span class="text-gray-500 dark:text-gray-400">(${normalizedKey.length} ký tự)</span>
+        <span class="text-xs text-gray-600 dark:text-gray-300 bg-pink-100 dark:bg-pink-900/30 px-2 py-1 rounded">
+            Shift = Vị trí ký tự trong bảng chữ cái
+        </span>
+    </div>
+`;
 }
 
-// Kiểm tra ký tự hợp lệ cho khoá Bellaso (А-Я, 0-9)
+// Kiểm tra ký tự hợp lệ cho khoá Bellaso (chỉ А-Я)
 function isValidBellasoKeyChar(char) {
-    const validChars = GrassEAD.RUSSIAN_ALPHABET + GrassEAD.RUSSIAN_ALPHABET_LOWER + '0123456789';
-    return validChars.includes(char);
+    return GrassEAD.RUSSIAN_ALPHABET.includes(char.toUpperCase());
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -455,10 +405,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const isEncrypt = currentMode === 'encrypt';
 
         if (inputLabel) {
-            inputLabel.textContent = isEncrypt ? '📝 Văn bản gốc' : '📝 Văn bản mã hoá';
+            inputLabel.textContent = isEncrypt ? 'Văn bản gốc' : 'Văn bản mã hoá';
         }
         if (outputLabel) {
-            outputLabel.textContent = isEncrypt ? '🔐 Văn bản mã hoá' : '🔓 Văn bản giải mã';
+            outputLabel.textContent = isEncrypt ? 'Văn bản mã hoá' : 'Văn bản gốc';
         }
         if (input) {
             input.placeholder = isEncrypt
@@ -468,11 +418,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (modeEncrypt && modeDecrypt) {
             if (isEncrypt) {
-                modeEncrypt.className = 'px-4 py-2 bg-purple-600 border-2 border-purple-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-teal-500 text-teal-500 dark:text-teal-400 rounded-lg text-sm font-medium transition-colors hover:bg-teal-50 dark:hover:bg-teal-900/20';
+                modeEncrypt.className = 'px-4 py-2 bg-red-500 border-2 border-red-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-blue-400 text-blue-500 dark:text-blue-400 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20';
             } else {
-                modeDecrypt.className = 'px-4 py-2 bg-teal-500 border-2 border-teal-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-purple-500 text-purple-500 dark:text-purple-400 rounded-lg text-sm font-medium transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20';
+                modeDecrypt.className = 'px-4 py-2 bg-blue-500 border-2 border-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-red-400 text-red-500 dark:text-red-400 rounded-lg text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20';
             }
         }
 
@@ -525,7 +475,6 @@ document.addEventListener('DOMContentLoaded', function () {
         output.value = result;
     }
 
-    // Xử lý key
     function handleKeyInput(event) {
         const text = event.target.value;
         let processed = '';
@@ -544,11 +493,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (hasInvalidChar) {
             const uniqueInvalid = [...new Set(invalidChars)];
-            GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я và số 0-9`, 'error');
+            GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я`, 'error');
         }
 
         let finalKey = processed.toUpperCase();
-        finalKey = finalKey.replace(/[^А-Я0-9]/g, '');
+        finalKey = finalKey.replace(/[^А-Я]/g, '');
 
         const cursorPos = this.selectionStart;
         this.value = finalKey;
@@ -562,7 +511,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateOutput();
     }
 
-    // Input events
     if (input) {
         input.addEventListener('input', handleInput);
         input.addEventListener('paste', function (e) {
@@ -577,7 +525,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Key input events
     if (keyInput) {
         keyInput.placeholder = 'ТРАВА';
         keyInput.value = '';
@@ -621,11 +568,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (hasInvalidChar) {
                     const uniqueInvalid = [...new Set(invalidChars)];
-                    GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я và số 0-9`, 'error');
+                    GrassEAD.showMessage(`Ký tự không hợp lệ trong khoá: ${uniqueInvalid.join(', ')}. Chỉ chấp nhận chữ cái А-Я`, 'error');
                 }
 
                 let finalKey = processed.toUpperCase();
-                finalKey = finalKey.replace(/[^А-Я0-9]/g, '');
+                finalKey = finalKey.replace(/[^А-Я]/g, '');
                 this.value = finalKey;
                 currentKey = finalKey;
                 const currentText = input ? input.value : '';
@@ -637,7 +584,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Mode buttons
     if (modeEncrypt) {
         modeEncrypt.addEventListener('click', function () {
             if (currentMode !== 'encrypt') {
@@ -658,7 +604,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // View toggle
     if (viewToggle) {
         viewToggle.addEventListener('click', function () {
             isVertical = !isVertical;
@@ -671,7 +616,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Copy/Paste buttons
     if (pasteBtn) {
         pasteBtn.addEventListener('click', function (e) {
             e.preventDefault();
@@ -710,7 +654,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Khởi tạo
     updateUI();
     const initialKey = 'ТРАВА';
     renderBellasoTable('', initialKey, false, isVertical);

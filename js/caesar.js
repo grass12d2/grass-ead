@@ -24,95 +24,288 @@ function caesarDecrypt(text, shift = 3) {
     return caesarEncrypt(text, -shift);
 }
 
+// Lấy danh sách items cho bảng chi tiết
+function getDetailItems() {
+    const input = document.getElementById('caesar-input');
+    if (!input) return [];
+    const text = input.value;
+    if (!text || text.trim() === '') return [];
+
+    const upper = GrassEAD.RUSSIAN_ALPHABET;
+    const len = upper.length;
+    const items = [];
+
+    const processed = GrassEAD.processInput(text);
+    const shift = currentShift;
+
+    for (let char of processed) {
+        if (char === ' ') continue;
+        if (upper.includes(char)) {
+            const index = upper.indexOf(char);
+            let mappedIndex;
+            let mappedChar;
+            if (currentModeGlobal === 'encrypt') {
+                mappedIndex = ((index + shift) % len + len) % len;
+                mappedChar = upper[mappedIndex];
+            } else {
+                mappedIndex = ((index - shift) % len + len) % len;
+                mappedChar = upper[mappedIndex];
+            }
+            items.push({
+                input: char,
+                output: mappedChar,
+                inputPos: index + 1,
+                outputPos: mappedIndex + 1
+            });
+        } else {
+            items.push({ input: char, output: char, inputPos: '-', outputPos: '-' });
+        }
+    }
+
+    return items;
+}
+
+// Tính dấu và giá trị tuyệt đối của shift để hiển thị
+function getShiftDisplay(isEncrypt) {
+    if (currentShift === 0) {
+        return { sign: '', abs: 0 };
+    }
+    const effectiveSign = isEncrypt ? Math.sign(currentShift) : -Math.sign(currentShift);
+    return {
+        sign: effectiveSign > 0 ? '+' : '-',
+        abs: Math.abs(currentShift)
+    };
+}
+
+// Render chi tiết (ngang)
+function renderDetailHorizontal() {
+    const container = document.getElementById('caesar-detail');
+    if (!container) return;
+
+    const items = getDetailItems();
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-info-circle text-xl mb-2 block"></i>
+                <p class="text-sm">Nhập văn bản để xem chi tiết từng ký tự</p>
+            </div>
+        `;
+        return;
+    }
+
+    const isEncrypt = currentModeGlobal === 'encrypt';
+    const label1 = isEncrypt ? 'Gốc' : 'Mã hoá';
+    const label2 = isEncrypt ? 'Mã hoá' : 'Gốc';
+    const shiftInfo = getShiftDisplay(isEncrypt);
+    const shiftSign = shiftInfo.sign;
+    const shiftAbs = shiftInfo.abs;
+
+    let html = `
+        <div class="overflow-x-auto pb-3">
+            <table class="table-encrypt">
+                <thead>
+                    <tr>
+                        <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[60px] sticky left-0 z-20">Vị trí</th>
+    `;
+
+    items.forEach((item, index) => {
+        html += `
+            <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[70px]">
+                ${index + 1}
+            </th>
+        `;
+    });
+
+    html += `</tr></thead><tbody>`;
+
+    // Hàng 1: input (label sticky)
+    html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[60px]">${label1}</td>`;
+    items.forEach(item => {
+        html += `
+            <td class="font-bold text-gray-900 dark:text-white text-center text-base">
+                ${item.input}
+                <span class="text-xs text-gray-500 dark:text-gray-400 block">${item.inputPos}</span>
+            </td>
+        `;
+    });
+    html += `</tr>`;
+
+    // Hàng 2: shift (label sticky)
+    html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[60px]">Shift</td>`;
+    items.forEach(() => {
+        html += `
+            <td class="font-bold text-purple-600 dark:text-purple-400 text-center text-base">
+                ${shiftSign}${shiftAbs}
+            </td>
+        `;
+    });
+    html += `</tr>`;
+
+    // Hàng 3: output (label sticky)
+    html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[60px]">${label2}</td>`;
+    items.forEach(item => {
+        html += `
+            <td class="font-bold text-blue-600 dark:text-blue-400 text-center text-base">
+                ${item.output}
+                <span class="text-xs text-gray-500 dark:text-gray-400 block">${item.outputPos}</span>
+            </td>
+        `;
+    });
+    html += `</tr>`;
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <i class="fas fa-info-circle mr-1"></i>
+            Số nhỏ bên dưới ký tự là vị trí trong bảng chữ cái (А=1, Б=2, ..., Я=32)
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+// Render chi tiết (dọc)
+function renderDetailVertical() {
+    const container = document.getElementById('caesar-detail');
+    if (!container) return;
+
+    const items = getDetailItems();
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-info-circle text-xl mb-2 block"></i>
+                <p class="text-sm">Nhập văn bản để xem chi tiết từng ký tự</p>
+            </div>
+        `;
+        return;
+    }
+
+    const isEncrypt = currentModeGlobal === 'encrypt';
+    const label1 = isEncrypt ? 'Gốc' : 'Mã hoá';
+    const label2 = isEncrypt ? 'Mã hoá' : 'Gốc';
+    const shiftInfo = getShiftDisplay(isEncrypt);
+    const shiftSign = shiftInfo.sign;
+    const shiftAbs = shiftInfo.abs;
+
+    let html = `
+        <div class="overflow-y-auto max-h-[500px] rounded-lg">
+            <table class="table-encrypt">
+                <thead class="sticky top-0">
+                    <tr>
+                        <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[60px]">Vị trí</th>
+                        <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[80px]">${label1}</th>
+                        <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[70px]">Shift</th>
+                        <th class="bg-blue-100 dark:bg-blue-900/30 min-w-[80px]">${label2}</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    items.forEach((item, index) => {
+        html += `
+            <tr>
+                <td class="font-bold text-gray-900 dark:text-white text-center">${index + 1}</td>
+                <td class="font-bold text-gray-900 dark:text-white text-center">
+                    ${item.input}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">(${item.inputPos})</span>
+                </td>
+                <td class="font-bold text-purple-600 dark:text-purple-400 text-center">${shiftSign}${shiftAbs}</td>
+                <td class="font-bold text-blue-600 dark:text-blue-400 text-center">
+                    ${item.output}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">(${item.outputPos})</span>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <i class="fas fa-info-circle mr-1"></i>
+            Số trong ngoặc là vị trí trong bảng chữ cái (А=1, Б=2, ..., Я=32)
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function renderDetailTable() {
+    if (isVertical) {
+        renderDetailVertical();
+    } else {
+        renderDetailHorizontal();
+    }
+}
+
 // Render bảng Caesar (ngang)
 function renderCaesarTableHorizontal(shift, isDecrypt = false) {
     const container = document.getElementById('caesar-table');
     if (!container) return;
 
+    const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
+    const len = chars.length;
+    const displayShift = shift;
+
     let html = `
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto pb-3">
             <table class="table-encrypt">
-                <thead>
-                    <tr>
-                        <th class="bg-blue-100 dark:bg-blue-900/30">Ký tự</th>
+                <tbody>
     `;
 
     if (isDecrypt) {
-        // CHẾ ĐỘ GIẢI MÃ: hàng mã hoá cố định từ А-Я, hàng gốc thay đổi
-        const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
-        const len = chars.length;
-
-        // Header hiển thị ký tự mã hoá (cố định А-Я)
-        chars.forEach(char => {
+        // Hàng "Mã hoá" — ký tự cố định А-Я, kèm vị trí (hàng đầu tiên → cần border-t)
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm border-t border-amber-100 dark:border-gray-700 sticky left-0 z-10 min-w-[80px]">Mã hoá</td>`;
+        chars.forEach((char, i) => {
             html += `
-                <th class="bg-blue-100 dark:bg-blue-900/30">
+                <td class="font-bold text-blue-600 dark:text-blue-400 text-center border-t border-amber-100 dark:border-gray-700">
                     ${char}
-                </th>
-            `;
-        });
-
-        html += `</tr></thead><tbody>`;
-
-        // Hàng 1: Mã hoá (cố định)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700">Mã hoá</td>`;
-        chars.forEach(char => {
-            html += `
-                <td class="font-bold text-teal-600 dark:text-teal-400">
-                    ${char}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">${i + 1}</span>
                 </td>
             `;
         });
         html += `</tr>`;
 
-        // Hàng 2: Gốc (thay đổi theo shift ngược)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700">Gốc</td>`;
-        chars.forEach(char => {
-            const index = GrassEAD.RUSSIAN_ALPHABET.indexOf(char);
-            const newIndex = ((index - shift) % len + len) % len;
-            const originalChar = GrassEAD.RUSSIAN_ALPHABET[newIndex];
+        // Hàng "Gốc"
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Gốc</td>`;
+        chars.forEach((char, i) => {
+            const newIndex = ((i - displayShift) % len + len) % len;
+            const originalChar = chars[newIndex];
             html += `
-                <td class="font-bold text-gray-900 dark:text-white">
+                <td class="font-bold text-gray-900 dark:text-white text-center">
                     ${originalChar}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">${newIndex + 1}</span>
                 </td>
             `;
         });
         html += `</tr>`;
     } else {
-        // CHẾ ĐỘ MÃ HOÁ
-        const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
-        const len = chars.length;
-
-        // Header hiển thị ký tự gốc
-        chars.forEach(char => {
+        // Hàng "Gốc" — ký tự cố định А-Я, kèm vị trí (hàng đầu tiên → cần border-t)
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm border-t border-amber-100 dark:border-gray-700 sticky left-0 z-10 min-w-[80px]">Gốc</td>`;
+        chars.forEach((char, i) => {
             html += `
-                <th class="bg-blue-100 dark:bg-blue-900/30">
+                <td class="font-bold text-gray-900 dark:text-white text-center border-t border-amber-100 dark:border-gray-700">
                     ${char}
-                </th>
-            `;
-        });
-
-        html += `</tr></thead><tbody>`;
-
-        // Hàng 1: Gốc (cố định)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700">Gốc</td>`;
-        chars.forEach(char => {
-            html += `
-                <td class="font-bold text-gray-900 dark:text-white">
-                    ${char}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">${i + 1}</span>
                 </td>
             `;
         });
         html += `</tr>`;
 
-        // Hàng 2: Mã hoá (thay đổi theo shift)
-        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700">Mã hoá</td>`;
-        chars.forEach(char => {
-            const index = GrassEAD.RUSSIAN_ALPHABET.indexOf(char);
-            const newIndex = ((index + shift) % len + len) % len;
-            const encryptedChar = GrassEAD.RUSSIAN_ALPHABET[newIndex];
+        // Hàng "Mã hoá"
+        html += `<tr><td class="font-bold bg-gray-100 dark:bg-gray-700 text-sm sticky left-0 z-10 min-w-[80px]">Mã hoá</td>`;
+        chars.forEach((char, i) => {
+            const newIndex = ((i + displayShift) % len + len) % len;
+            const encryptedChar = chars[newIndex];
             html += `
-                <td class="font-bold text-blue-600 dark:text-blue-400">
+                <td class="font-bold text-blue-600 dark:text-blue-400 text-center">
                     ${encryptedChar}
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">${newIndex + 1}</span>
                 </td>
             `;
         });
@@ -120,9 +313,13 @@ function renderCaesarTableHorizontal(shift, isDecrypt = false) {
     }
 
     html += `
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+            <i class="fas fa-info-circle mr-1"></i>
+            Mỗi cột là một cặp ký tự gốc ↔ ký tự mã hoá với shift = ${displayShift}
+        </div>
     `;
 
     container.innerHTML = html;
@@ -133,51 +330,68 @@ function renderCaesarTableVertical(shift, isDecrypt = false) {
     const container = document.getElementById('caesar-table');
     if (!container) return;
 
+    const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
+    const len = chars.length;
+    const displayShift = shift;
+
     let html = `
+        <div class="overflow-y-auto max-h-[500px] rounded-lg">
             <table class="table-encrypt">
-                <thead>
+                <thead class="sticky top-0">
                     <tr>
-                        <th class="bg-blue-100 dark:bg-blue-900/30">Vị trí</th>
+    `;
+
+    if (isDecrypt) {
+        // Giải mã: input là mã hoá → Mã hoá bên trái, Gốc bên phải
+        html += `
                         <th class="bg-blue-100 dark:bg-blue-900/30">Mã hoá</th>
                         <th class="bg-blue-100 dark:bg-blue-900/30">Gốc</th>
                     </tr>
                 </thead>
                 <tbody>
-    `;
-
-    if (isDecrypt) {
-        // CHẾ ĐỘ GIẢI MÃ: hàng mã hoá cố định từ А-Я, hàng gốc thay đổi
-        const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
-        const len = chars.length;
+        `;
 
         chars.forEach((char, i) => {
-            const index = GrassEAD.RUSSIAN_ALPHABET.indexOf(char);
-            const newIndex = ((index - shift) % len + len) % len;
-            const originalChar = GrassEAD.RUSSIAN_ALPHABET[newIndex];
+            const newIndex = ((i - displayShift) % len + len) % len;
+            const originalChar = chars[newIndex];
 
             html += `
                 <tr>
-                    <td class="font-bold text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
-                    <td class="font-bold text-teal-600 dark:text-teal-400 text-center">${char}</td>
-                    <td class="font-bold text-gray-900 dark:text-white text-center">${originalChar}</td>
+                    <td class="font-bold text-blue-600 dark:text-blue-400 text-center">
+                        ${char}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block">(${i + 1})</span>
+                    </td>
+                    <td class="font-bold text-gray-900 dark:text-white text-center">
+                        ${originalChar}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block">(${newIndex + 1})</span>
+                    </td>
                 </tr>
             `;
         });
     } else {
-        // CHẾ ĐỘ MÃ HOÁ
-        const chars = GrassEAD.RUSSIAN_ALPHABET.split('');
-        const len = chars.length;
+        // Mã hoá: input là gốc → Gốc bên trái, Mã hoá bên phải
+        html += `
+                        <th class="bg-blue-100 dark:bg-blue-900/30">Gốc</th>
+                        <th class="bg-blue-100 dark:bg-blue-900/30">Mã hoá</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
 
         chars.forEach((char, i) => {
-            const index = GrassEAD.RUSSIAN_ALPHABET.indexOf(char);
-            const newIndex = ((index + shift) % len + len) % len;
-            const encryptedChar = GrassEAD.RUSSIAN_ALPHABET[newIndex];
+            const newIndex = ((i + displayShift) % len + len) % len;
+            const encryptedChar = chars[newIndex];
 
             html += `
                 <tr>
-                    <td class="font-bold text-gray-500 dark:text-gray-400 text-center">${i + 1}</td>
-                    <td class="font-bold text-gray-900 dark:text-white text-center">${char}</td>
-                    <td class="font-bold text-blue-600 dark:text-blue-400 text-center">${encryptedChar}</td>
+                    <td class="font-bold text-gray-900 dark:text-white text-center">
+                        ${char}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block">(${i + 1})</span>
+                    </td>
+                    <td class="font-bold text-blue-600 dark:text-blue-400 text-center">
+                        ${encryptedChar}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block">(${newIndex + 1})</span>
+                    </td>
                 </tr>
             `;
         });
@@ -209,6 +423,10 @@ function updateSliderBackground(slider) {
     slider.style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${percent}%, #e5e7eb ${percent}%, #e5e7eb 100%)`;
 }
 
+let currentModeGlobal = 'encrypt';
+let currentShift = 3;
+let isVertical = false;
+
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('caesar-input');
     const output = document.getElementById('caesar-output');
@@ -223,15 +441,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const modeEncrypt = document.getElementById('mode-encrypt');
     const modeDecrypt = document.getElementById('mode-decrypt');
     const viewToggle = document.getElementById('view-toggle');
-    const viewModeLabel = document.getElementById('view-mode-label');
+    const detailViewLabel = document.getElementById('detail-view-label');
     const pasteBtn = document.getElementById('paste-btn');
     const copyInputBtn = document.getElementById('copy-input-btn');
     const copyOutputBtn = document.getElementById('copy-output-btn');
     const clearBtn = document.getElementById('clear-btn');
 
     let currentMode = 'encrypt';
-    let currentShift = 3;
-    let isVertical = false;
+    currentModeGlobal = currentMode;
 
     function updateUI() {
         const isEncrypt = currentMode === 'encrypt';
@@ -250,11 +467,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (modeEncrypt && modeDecrypt) {
             if (isEncrypt) {
-                modeEncrypt.className = 'px-4 py-2 bg-purple-600 border-2 border-purple-600 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-teal-500 text-teal-500 dark:text-teal-400 rounded-lg text-sm font-medium transition-colors hover:bg-teal-50 dark:hover:bg-teal-900/20';
+                modeEncrypt.className = 'px-4 py-2 bg-red-500 border-2 border-red-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeDecrypt.className = 'px-4 py-2 bg-transparent border-2 border-blue-400 text-blue-500 dark:text-blue-400 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20';
             } else {
-                modeDecrypt.className = 'px-4 py-2 bg-teal-500 border-2 border-teal-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
-                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-purple-500 text-purple-500 dark:text-purple-400 rounded-lg text-sm font-medium transition-colors hover:bg-purple-50 dark:hover:bg-purple-900/20';
+                modeDecrypt.className = 'px-4 py-2 bg-blue-500 border-2 border-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-md';
+                modeEncrypt.className = 'px-4 py-2 bg-transparent border-2 border-red-400 text-red-500 dark:text-red-400 rounded-lg text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20';
             }
         }
 
@@ -263,8 +480,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? '<i class="fas fa-sync-alt mr-2"></i>Xem ngang'
                 : '<i class="fas fa-sync-alt mr-2"></i>Xem dọc';
         }
-        if (viewModeLabel) {
-            viewModeLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
+        if (detailViewLabel) {
+            detailViewLabel.textContent = isVertical ? '(Dọc)' : '(Ngang)';
         }
     }
 
@@ -280,10 +497,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateOutput() {
         if (!input || !output) return;
         const text = input.value;
+        const isDecrypt = currentMode === 'decrypt';
+
         if (!text) {
             output.value = '';
-            const isDecrypt = currentMode === 'decrypt';
             renderCaesarTable(currentShift, isDecrypt, isVertical);
+            renderDetailTable();
+            if (tableShiftValue) tableShiftValue.textContent = currentShift;
             return;
         }
         let result;
@@ -295,8 +515,8 @@ document.addEventListener('DOMContentLoaded', function () {
             result = caesarDecrypt(cleanText, currentShift);
         }
         output.value = result;
-        const isDecrypt = currentMode === 'decrypt';
         renderCaesarTable(currentShift, isDecrypt, isVertical);
+        renderDetailTable();
         if (tableShiftValue) tableShiftValue.textContent = currentShift;
     }
 
@@ -330,7 +550,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateOutput();
     }
 
-    // Input events
     if (input) {
         input.addEventListener('input', handleInput);
         input.addEventListener('paste', function (e) {
@@ -345,7 +564,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Shift events
     if (shiftInput) {
         shiftInput.min = -31;
         shiftInput.max = 31;
@@ -411,11 +629,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Mode buttons
     if (modeEncrypt) {
         modeEncrypt.addEventListener('click', function () {
             if (currentMode !== 'encrypt') {
                 currentMode = 'encrypt';
+                currentModeGlobal = currentMode;
                 updateUI();
                 updateOutput();
             }
@@ -426,13 +644,13 @@ document.addEventListener('DOMContentLoaded', function () {
         modeDecrypt.addEventListener('click', function () {
             if (currentMode !== 'decrypt') {
                 currentMode = 'decrypt';
+                currentModeGlobal = currentMode;
                 updateUI();
                 updateOutput();
             }
         });
     }
 
-    // View toggle
     if (viewToggle) {
         viewToggle.addEventListener('click', function () {
             isVertical = !isVertical;
@@ -441,7 +659,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Copy/Paste buttons
     if (pasteBtn) {
         pasteBtn.addEventListener('click', function (e) {
             e.preventDefault();
