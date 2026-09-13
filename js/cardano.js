@@ -151,15 +151,32 @@ function renderCardanoTemplate() {
     const result = currentCardanoResult;
     const isEncrypt = currentModeGlobal === 'encrypt';
 
-    let html = `<div class="overflow-x-auto pb-2"><table class="table-encrypt mx-auto" style="table-layout: fixed; width: auto;">
-        <thead><tr><th class="bg-violet-100 dark:bg-violet-900/30 w-8"></th>`;
+    // Kích thước cell theo grid size
+    const CELL_SIZE = { 4: 72, 6: 58, 8: 46, 10: 38 };
+    const FONT_SIZE = { 4: 28, 6: 22, 8: 17, 10: 13 };
+    const HEAD_FONT = { 4: 14, 6: 13, 8: 12, 10: 10 };
+    const ROW_LABEL_W = { 4: 40, 6: 34, 8: 28, 10: 24 };
+    const cellSize = CELL_SIZE[n] || 46;
+    const fontSize = FONT_SIZE[n] || 16;
+    const headFont = HEAD_FONT[n] || 12;
+    const rowLabelW = ROW_LABEL_W[n] || 30;
+
+    let html = `<div class="overflow-x-auto pb-2">
+        <table class="table-encrypt mx-auto" style="table-layout: fixed; width: auto;">
+            <thead><tr>
+                <th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+                    style="width:${rowLabelW}px;font-size:${headFont}px;"></th>`;
     for (let c = 1; c <= n; c++) {
-        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center w-10 text-xs">${c}</th>`;
+        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+            style="width:${cellSize}px;font-size:${headFont}px;">${c}</th>`;
     }
     html += `</tr></thead><tbody>`;
 
     for (let r = 0; r < n; r++) {
-        html += `<tr><td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center text-xs">${r + 1}</td>`;
+        html += `<tr>
+            <td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center"
+                style="width:${rowLabelW}px;font-size:${headFont}px;padding:2px;">${r + 1}</td>`;
+
         for (let c = 0; c < n; c++) {
             const rot = rotationForCell(cardanoTemplate, r, c);
             const ch = result ? (result.grid[r][c] || '') : '';
@@ -173,15 +190,18 @@ function renderCardanoTemplate() {
                     ? ' text-gray-400 dark:text-gray-500 italic'
                     : (isEncrypt ? ' text-violet-700 dark:text-violet-300' : ' text-gray-900 dark:text-white');
             } else {
-                content = `<span class="text-[10px] font-mono text-gray-500 dark:text-gray-400">${rot >= 0 ? rot : ''}</span>`;
+                content = `<span class="font-mono text-gray-500 dark:text-gray-400"
+                    style="font-size:${headFont}px;">${rot >= 0 ? rot : ''}</span>`;
             }
 
-            html += `<td class="${bg} text-center w-10 h-10 ${contentCls}">${content}</td>`;
+            html += `<td class="${bg} text-center ${contentCls}"
+                style="width:${cellSize}px;height:${cellSize}px;font-size:${fontSize}px;padding:4px;">${content}</td>`;
         }
         html += `</tr>`;
     }
     html += `</tbody></table></div>`;
 
+    // Legend (giữ nguyên)
     html += `
         <div class="mt-3 flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400 items-center">
             ${[0, 1, 2, 3].map(k => `
@@ -417,11 +437,15 @@ function renderAnimStage() {
 
     const n = cardanoTemplate.length;
 
+    // Font size tỉ lệ nghịch với grid size (khớp với cardano-template)
+    const ANIM_FONT = { 4: 28, 6: 22, 8: 17, 10: 13 };
+    const cellFont = ANIM_FONT[n] || 16;
+
     let cellsHtml = '';
     for (let r = 0; r < n; r++) {
         for (let c = 0; c < n; c++) {
             cellsHtml += `<div class="cardano-anim-cell" data-r="${r}" data-c="${c}"
-                style="grid-row:${r + 1};grid-column:${c + 1};"></div>`;
+                style="grid-row:${r + 1};grid-column:${c + 1};font-size:${cellFont}px;"></div>`;
         }
     }
 
@@ -441,14 +465,16 @@ function renderAnimStage() {
             <!-- Badge góc xoay: TRÊN BẢNG, ngoài board -->
             <div style="min-height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
                 <div id="anim-badge" style="
-                    min-width:110px;text-align:center;
-                    padding:8px 24px;border-radius:14px;font-size:22px;font-weight:800;
-                    background:linear-gradient(135deg, rgba(139,92,246,0.95), rgba(76,29,149,0.95));
-                    color:#fff;font-family:ui-monospace,monospace;
-                    transition:opacity 0.35s, transform 0.35s;
-                    opacity:0;pointer-events:none;
-                    box-shadow:0 10px 30px rgba(139,92,246,0.35);
-                    letter-spacing:0.05em;">0°</div>
+                min-width:clamp(64px, 18vw, 110px);text-align:center;
+                padding:clamp(4px, 1.2vw, 8px) clamp(12px, 4vw, 24px);
+                border-radius:clamp(8px, 2.5vw, 14px);
+                font-size:clamp(14px, 4.5vw, 22px);font-weight:800;
+                background:linear-gradient(135deg, rgba(139,92,246,0.95), rgba(76,29,149,0.95));
+                color:#fff;font-family:ui-monospace,monospace;
+                transition:opacity 0.35s, transform 0.35s;
+                opacity:0;pointer-events:none;
+                box-shadow:0 10px 30px rgba(139,92,246,0.35);
+                letter-spacing:0.05em;">0°</div>
             </div>
             <div class="cardano-anim-board" style="position:relative;width:100%;max-width:400px;aspect-ratio:1/1;
                 background:#ffffff;border-radius:14px;overflow:hidden;
@@ -806,16 +832,31 @@ function renderCustomGrid() {
         countEl.classList.toggle('dark:text-emerald-400', editorSelection.size === required);
     }
 
+    // Kích thước cell theo grid size
+    const CELL_SIZE = { 4: 64, 6: 52, 8: 42, 10: 34 };
+    const FONT_SIZE = { 4: 24, 6: 19, 8: 15, 10: 12 };
+    const HEAD_FONT = { 4: 14, 6: 13, 8: 12, 10: 10 };
+    const ROW_LABEL_W = { 4: 38, 6: 32, 8: 26, 10: 22 };
+    const cs = CELL_SIZE[n] || 42;
+    const fs = FONT_SIZE[n] || 15;
+    const hf = HEAD_FONT[n] || 12;
+    const rw = ROW_LABEL_W[n] || 28;
+
     let html = `<div class="overflow-x-auto pb-2">
         <table class="table-encrypt mx-auto" style="table-layout: fixed; width: auto;">
-            <thead><tr><th class="bg-violet-100 dark:bg-violet-900/30 w-8"></th>`;
+            <thead><tr>
+                <th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+                    style="width:${rw}px;font-size:${hf}px;"></th>`;
     for (let c = 1; c <= n; c++) {
-        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center w-10 text-xs">${c}</th>`;
+        html += `<th class="bg-violet-100 dark:bg-violet-900/30 text-center"
+            style="width:${cs}px;font-size:${hf}px;">${c}</th>`;
     }
     html += `</tr></thead><tbody>`;
 
     for (let r = 0; r < n; r++) {
-        html += `<tr><td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center text-xs">${r + 1}</td>`;
+        html += `<tr>
+            <td class="font-bold bg-violet-100 dark:bg-violet-900/30 text-center"
+                style="width:${rw}px;font-size:${hf}px;padding:2px;">${r + 1}</td>`;
         for (let c = 0; c < n; c++) {
             const key = `${r},${c}`;
             const isSel = editorSelection.has(key);
@@ -823,13 +864,14 @@ function renderCustomGrid() {
             const isAffected = !isSel && rot >= 0;
 
             const bg = rot >= 0 ? CARDANO_ROT_BG[rot] : 'bg-gray-100 dark:bg-gray-700/30';
-            const cls = ['custom-cell', 'text-center', 'w-10', 'h-10', 'font-bold', 'font-mono'];
+            const cls = ['custom-cell', 'text-center', 'font-bold', 'font-mono'];
             if (isSel) cls.push('custom-cell-selected');
             if (isAffected) cls.push('custom-cell-affected');
 
             const content = isSel ? '●' : (isAffected ? '○' : '');
 
-            html += `<td class="${bg} ${cls.join(' ')}" data-r="${r}" data-c="${c}">${content}</td>`;
+            html += `<td class="${bg} ${cls.join(' ')}" data-r="${r}" data-c="${c}"
+                style="width:${cs}px;height:${cs}px;font-size:${fs}px;padding:4px;">${content}</td>`;
         }
         html += `</tr>`;
     }

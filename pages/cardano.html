@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="../css/output.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        /* Progress steps */
+        /* ===== Progress steps ===== */
         .anim-step {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             padding: 8px 4px;
             border-radius: 10px;
             transition: all 0.35s ease;
@@ -31,10 +31,10 @@
             opacity: 1;
         }
 
-        /* Progress dot: spinner / check */
+        /* ===== Progress dot: spinner / check ===== */
         .anim-step-dot {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: #f3f4f6;
             border: 2px solid #d1d5db;
@@ -43,6 +43,7 @@
             justify-content: center;
             transition: background 0.3s, border-color 0.3s;
             box-sizing: border-box;
+            margin-bottom: 4px;
         }
 
         .dark .anim-step-dot {
@@ -53,7 +54,7 @@
         /* Active: vòng xoay violet */
         .anim-step.active .anim-step-dot {
             background: transparent;
-            border: 3px solid transparent;
+            border: 2.5px solid transparent;
             border-top-color: #8b5cf6;
             border-right-color: #8b5cf6;
             animation: cardanoSpin 0.8s linear infinite;
@@ -75,37 +76,47 @@
         .anim-step.done .anim-step-dot::before {
             content: '';
             display: block;
-            width: 6px;
-            height: 11px;
+            width: 5px;
+            height: 10px;
             border: solid white;
-            border-width: 0 2.5px 2.5px 0;
+            border-width: 0 2px 2px 0;
             transform: rotate(45deg) translate(-1px, -2px);
         }
 
+        /* ===== Label & angle ===== */
         .anim-step-label {
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 700;
-            color: #6b7280;
+            color: #374151;
+            letter-spacing: 0.01em;
+            line-height: 1.1;
+            margin: 3px 0 0 0;
         }
 
         .dark .anim-step-label {
-            color: #9ca3af;
+            color: #d1d5db;
         }
 
         .anim-step-angle {
-            font-size: 10px;
+            font-size: 15px;
+            font-weight: 700;
             font-family: ui-monospace, monospace;
+            color: #6b7280;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .dark .anim-step-angle {
             color: #9ca3af;
         }
 
-        /* Grid cells */
+        /* ===== Grid cells (animation) ===== */
         .cardano-anim-cell {
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: ui-monospace, monospace;
             font-weight: 700;
-            font-size: 15px;
             border: 1px solid rgba(0, 0, 0, 0.06);
             background: #fafafa;
             transition: background 0.3s, color 0.3s;
@@ -173,6 +184,7 @@
             background: rgba(167, 139, 250, 0.12);
         }
 
+        /* ===== Custom template editor ===== */
         .custom-cell {
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
@@ -306,13 +318,14 @@
                 </div>
             </div>
 
-            <!-- ===== Template & lưới kết quả (RIÊNG) ===== -->
+            <!-- ===== Template & lưới kết quả ===== -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     <i class="fas fa-border-all text-violet-500 mr-2"></i>Template &amp; lưới kết quả
                 </h2>
                 <div id="cardano-template"></div>
-                <!-- ===== Custom template editor (ẩn mặc định) ===== -->
+
+                <!-- ===== Custom template editor ===== -->
                 <div id="custom-editor"
                     class="hidden mt-6 bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-violet-300 dark:border-violet-700 p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -352,7 +365,7 @@
                 </div>
             </div>
 
-            <!-- ===== Hoạt ảnh xoay lưới (RIÊNG) ===== -->
+            <!-- ===== Hoạt ảnh xoay lưới ===== -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -397,7 +410,7 @@
                 <!-- Stage -->
                 <div id="anim-stage" class="mb-4"></div>
 
-                <!-- Điều hướng xem lại từng lượt (hiện sau khi chạy xong) -->
+                <!-- Điều hướng xem lại từng lượt -->
                 <div id="anim-nav" style="display:none;" class="items-center justify-center gap-3 mt-4">
                     <button id="anim-prev" type="button"
                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm">
