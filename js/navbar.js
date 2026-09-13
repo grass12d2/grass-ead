@@ -18,8 +18,9 @@
     let searchState = { selectedIndex: 0, matches: [] };
 
     // ===== Helpers =====
+    // Luôn prefix link bằng đường dẫn tương đối để không trỏ về server root
     function getFullPath(path) {
-        return isInPages ? '..' + path : path;
+        return (isInPages ? '..' : '.') + path;
     }
 
     function colorClasses(color) {
@@ -247,44 +248,6 @@
         const basePath = isInPages ? '../' : '';
         const cacheBust = '?v=' + Date.now();
 
-        const navbarPh = document.getElementById('navbar-placeholder');
-        if (navbarPh) {
-            try {
-                const res = await fetch(basePath + 'components/navbar.html' + cacheBust);
-                if (res.ok) {
-                    navbarPh.innerHTML = await res.text();
-                    if (isInPages) {
-                        navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
-                            a.setAttribute('href', '..' + a.getAttribute('href'));
-                        });
-                    }
-                }
-            } catch (err) {
-                console.error('[Navbar] Load error:', err);
-            }
-        }
-
-        await new Promise(resolve => requestAnimationFrame(resolve));
-
-        applyTheme();
-        renderSearchResults('');
-        bindNavbarEvents();
-
-        console.log('[Navbar] Ready');
-    }
-
-    // ==================== START ====================
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadNavbar);
-    } else {
-        loadNavbar();
-    }
-
-    async function loadNavbar() {
-        isInPages = window.location.pathname.includes('/pages/');
-        const basePath = isInPages ? '../' : '';
-        const cacheBust = '?v=' + Date.now();
-
         // ===== Load navbar =====
         const navbarPh = document.getElementById('navbar-placeholder');
         if (navbarPh) {
@@ -292,11 +255,16 @@
                 const res = await fetch(basePath + 'components/navbar.html' + cacheBust);
                 if (res.ok) {
                     navbarPh.innerHTML = await res.text();
-                    if (isInPages) {
-                        navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
-                            a.setAttribute('href', '..' + a.getAttribute('href'));
-                        });
-                    }
+
+                    // Rewrite TẤT CẢ link bắt đầu bằng "/" (không chỉ ở /pages/)
+                    const prefix = isInPages ? '..' : '.';
+                    navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
+                        a.setAttribute('href', prefix + a.getAttribute('href'));
+                    });
+
+                    // Đưa sticky lên placeholder — nav bên trong không tự stick
+                    // được vì placeholder chỉ cao bằng nav
+                    navbarPh.classList.add('sticky', 'top-0', 'z-40');
                 }
             } catch (err) {
                 console.error('[Navbar] Load error:', err);
@@ -316,7 +284,7 @@
             }
         }
 
-        // ===== Update year cho footer (và mọi .current-year khác) =====
+        // ===== Update year cho footer =====
         document.querySelectorAll('.current-year').forEach(el => {
             el.textContent = new Date().getFullYear();
         });
@@ -328,5 +296,12 @@
         bindNavbarEvents();
 
         console.log('[Navbar] Ready');
+    }
+
+    // ==================== START ====================
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadNavbar);
+    } else {
+        loadNavbar();
     }
 })();

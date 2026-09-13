@@ -1,6 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ==================== DARK MODE (class-based) ==================== */
+/* Tương đương darkMode: 'class' của v3 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==================== THEME (thay cho tailwind.config.js) ==================== */
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+}
 
 /* ==================== CUSTOM SCROLLBAR ==================== */
 
@@ -67,7 +83,7 @@
   background: transparent;
 }
 
-/* --- Bảng cuộn ngang/dọc/tự động (overflow-x-auto, overflow-y-auto, overflow-auto) --- */
+/* --- Bảng cuộn ngang/dọc/tự động --- */
 .overflow-x-auto,
 .overflow-y-auto,
 .overflow-auto {
@@ -154,6 +170,7 @@
   background: transparent;
 }
 
+/* ==================== BASE LAYER ==================== */
 @layer base {
 
   html,
@@ -166,6 +183,7 @@
   }
 }
 
+/* ==================== COMPONENTS LAYER ==================== */
 @layer components {
   .card {
     @apply bg-amber-100 dark:bg-gray-800 rounded-xl shadow-lg border border-amber-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300;
@@ -201,7 +219,7 @@
   }
 }
 
-/* Range input styling */
+/* ==================== RANGE INPUT ==================== */
 input[type="range"] {
   @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700;
 }
@@ -214,7 +232,7 @@ input[type="range"]::-moz-range-thumb {
   @apply w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-500 cursor-pointer border-0 hover:bg-blue-700;
 }
 
-/* Popup animation */
+/* ==================== POPUP ANIMATIONS ==================== */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -245,7 +263,7 @@ input[type="range"]::-moz-range-thumb {
   animation: fadeOut 0.3s ease-in;
 }
 
-/* Message popup style */
+/* ==================== MESSAGE POPUP ==================== */
 .message-popup {
   max-width: 500px;
   backdrop-filter: blur(4px);
@@ -253,7 +271,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-/* Button hover effects */
+/* ==================== BUTTON EFFECTS ==================== */
 button {
   @apply transition-all duration-200;
 }
@@ -262,7 +280,7 @@ button:active {
   @apply scale-95;
 }
 
-/* Number input styling */
+/* ==================== NUMBER INPUT ==================== */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
