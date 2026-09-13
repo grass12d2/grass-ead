@@ -316,10 +316,12 @@
         // ===== Load navbar (có cache) =====
         const navbarPh = document.getElementById('navbar-placeholder');
         if (navbarPh) {
-            // Thử đọc từ sessionStorage trước
+            // Đổi version này MỖI KHI sửa components/navbar.html
+            const NAVBAR_CACHE_VERSION = 'v2';
+
             let cachedHtml = null;
             try {
-                cachedHtml = sessionStorage.getItem('navbar-html');
+                cachedHtml = sessionStorage.getItem('navbar-html-' + NAVBAR_CACHE_VERSION);
             } catch (e) { }
 
             if (cachedHtml) {
@@ -336,7 +338,7 @@
                         applyCachedNavbar(navbarPh);
                         // Lưu cache cho lần sau
                         try {
-                            sessionStorage.setItem('navbar-html', html);
+                            sessionStorage.setItem('navbar-html-' + NAVBAR_CACHE_VERSION, html);
                         } catch (e) { }
                     }
                 } catch (err) {
@@ -345,14 +347,24 @@
             }
         }
 
-        // Hàm phụ để rewrite link + sticky
+        // Hàm phụ để rewrite link + sticky + brand text
         function applyCachedNavbar(navbarPh) {
             const prefix = isInPages ? '..' : '.';
             navbarPh.querySelectorAll('a[href^="/"]').forEach(a => {
                 a.setAttribute('href', prefix + a.getAttribute('href'));
             });
             navbarPh.classList.add('sticky', 'top-0', 'z-40');
+
+            // ===== Brand superscript: EAD ↔ Encrypt And Decrypt theo viewport =====
+            function updateBrandText() {
+                const el = navbarPh.querySelector('#navbar-brand-sup');
+                if (!el) return;
+                el.textContent = window.innerWidth >= 900 ? 'Encrypt And Decrypt' : 'EAD';
+            }
+            updateBrandText();
+            window.addEventListener('resize', updateBrandText);
         }
+
 
         // ===== Load footer =====
         const footerPh = document.getElementById('footer-placeholder');
