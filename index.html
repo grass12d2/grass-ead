@@ -49,10 +49,10 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
             <!-- Caesar — Blue -->
             <div id="caesar"
-                class="bg-blue-50 dark:bg-gray-800 rounded-xl shadow-lg border border-blue-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-blue-50 dark:bg-gray-800 rounded-xl shadow-lg border border-blue-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -64,16 +64,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Caesar</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Dịch chuyển các chữ cái theo số bước (shift)</p>
-                <a href="pages/caesar.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Dịch chuyển các chữ cái theo số bước (shift)</p>
+                <div>
+                    <a href="pages/caesar.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Atbash — Fuchsia -->
             <div id="atbash"
-                class="bg-fuchsia-50 dark:bg-gray-800 rounded-xl shadow-lg border border-fuchsia-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-fuchsia-50 dark:bg-gray-800 rounded-xl shadow-lg border border-fuchsia-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center">
@@ -85,16 +87,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Atbash</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Đảo ngược bảng chữ cái (А↔Я, Б↔Ю, ...)</p>
-                <a href="pages/atbash.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Đảo ngược bảng chữ cái (А↔Я, Б↔Ю, ...)</p>
+                <div>
+                    <a href="pages/atbash.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Polybius — Green -->
             <div id="polybius"
-                class="bg-green-50 dark:bg-gray-800 rounded-xl shadow-lg border border-green-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-green-50 dark:bg-gray-800 rounded-xl shadow-lg border border-green-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
@@ -106,16 +110,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Polybius</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Mã hoá bằng bảng chữ cái 6×6</p>
-                <a href="pages/polybius.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Mã hoá bằng bảng chữ cái 6×6</p>
+                <div>
+                    <a href="pages/polybius.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Trithemius — Indigo -->
             <div id="trithemius"
-                class="bg-indigo-50 dark:bg-gray-800 rounded-xl shadow-lg border border-indigo-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-indigo-50 dark:bg-gray-800 rounded-xl shadow-lg border border-indigo-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -127,16 +133,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Trithemius</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Shift tăng dần theo vị trí ký tự</p>
-                <a href="pages/trithemius.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Shift tăng dần theo vị trí ký tự</p>
+                <div>
+                    <a href="pages/trithemius.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Bellaso — Pink -->
             <div id="bellaso"
-                class="bg-pink-50 dark:bg-gray-800 rounded-xl shadow-lg border border-pink-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-pink-50 dark:bg-gray-800 rounded-xl shadow-lg border border-pink-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
@@ -148,16 +156,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Bellaso</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Mã hoá đa bảng chữ cái với khoá</p>
-                <a href="pages/bellaso.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Mã hoá đa bảng chữ cái với khoá</p>
+                <div>
+                    <a href="pages/bellaso.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Vigenère Autokey — Orange -->
             <div id="vigenere-autokey"
-                class="bg-orange-50 dark:bg-gray-800 rounded-xl shadow-lg border border-orange-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-orange-50 dark:bg-gray-800 rounded-xl shadow-lg border border-orange-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
@@ -169,16 +179,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Vigenère Autokey</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Gamma = Khoá + Văn bản (tự động)</p>
-                <a href="pages/vigenere-autokey.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Gamma = Khoá + Văn bản (tự động)</p>
+                <div>
+                    <a href="pages/vigenere-autokey.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Vigenère Ciphertext — Cyan -->
             <div id="vigenere-ctkey"
-                class="bg-cyan-50 dark:bg-gray-800 rounded-xl shadow-lg border border-cyan-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-cyan-50 dark:bg-gray-800 rounded-xl shadow-lg border border-cyan-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
@@ -190,16 +202,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Vigenère Ciphertext</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Gamma = Khoá + Bản mã (tự động)</p>
-                <a href="pages/vigenere-ctkey.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Gamma = Khoá + Bản mã (tự động)</p>
+                <div>
+                    <a href="pages/vigenere-ctkey.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Cardan Grille — Violet -->
             <div id="cardano"
-                class="bg-violet-50 dark:bg-gray-800 rounded-xl shadow-lg border border-violet-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-violet-50 dark:bg-gray-800 rounded-xl shadow-lg border border-violet-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
@@ -211,16 +225,18 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Cardan Grille</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Lưới khoét xoay 4 vị trí — Решетка Кардано</p>
-                <a href="pages/cardano.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Lưới khoét xoay 4 vị trí — Решетка Кардано</p>
+                <div>
+                    <a href="pages/cardano.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
 
             <!-- Cardano Rectangle — Emerald -->
             <div id="cardano-rect"
-                class="bg-emerald-50 dark:bg-gray-800 rounded-xl shadow-lg border border-emerald-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6">
+                class="bg-emerald-50 dark:bg-gray-800 rounded-xl shadow-lg border border-emerald-200 dark:border-gray-700 hover:shadow-xl hover:scale-105 transition-all duration-300 p-6 flex flex-col">
                 <div class="flex justify-between items-start mb-3">
                     <span
                         class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -232,11 +248,14 @@
                     </span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Cardano chữ nhật</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">Lưới chữ nhật 4×6, 6×8, 6×10 — 4 vị trí biến đổi</p>
-                <a href="pages/cardano-rect.html"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors">
-                    Sử dụng <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <p class="text-gray-600 dark:text-gray-400 mb-4 flex-1">Lưới chữ nhật 4×6, 6×8, 6×10 — 4 vị trí biến đổi
+                </p>
+                <div>
+                    <a href="pages/cardano-rect.html"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors">
+                        Sử dụng <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </main>

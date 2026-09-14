@@ -13,7 +13,7 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cardan Rect - Grass EAD</title>
+    <title>Cardan Grille (hình chữ nhật) - Grass EAD</title>
     <link rel="stylesheet" href="../css/output.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
@@ -173,10 +173,12 @@
         }
 
         .cardano-anim-grille {
-            transition: transform 2.7s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
+            transition: transform 2s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
             will-change: transform;
             transform-style: preserve-3d;
             backface-visibility: visible;
+            border-radius: 14px;
+            overflow: hidden;
         }
 
         .anim-chunk {
@@ -272,13 +274,13 @@
     <div id="warning-placeholder"></div>
 
     <main class="max-w-screen-xl mx-auto p-6 flex-1 w-full">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Rect</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Grille (hình chữ nhật) </h1>
 
         <div class="bg-emerald-100 dark:bg-gray-800 border border-emerald-400 dark:border-gray-700 p-4 rounded-lg mb-6">
             <p class="text-sm text-gray-700 dark:text-gray-300">
                 <i class="fas fa-info-circle text-emerald-700 dark:text-emerald-400 mr-1"></i>
                 <strong>Quy tắc:</strong>
-                Dùng tấm lưới chữ nhật <strong>R × C</strong> (R = 2m, C = 2k) khoét <strong>R·C/4</strong> lỗ.
+                Dùng tấm lưới chữ nhật <strong>R × C</strong> (R = 2m, C = 2k) khoét <strong>m.k</strong> lỗ.
                 <br>
                 Lưới chữ nhật <strong>không xoay 90°</strong> được, nên dùng 4 phép biến đổi:
                 <br>
@@ -303,7 +305,7 @@
                 <br>
                 <span class="text-emerald-800 dark:text-emerald-400">
                     <i class="fas fa-lightbulb mr-1"></i>
-                    Số khoá tiềm năng = 4^(R·C/4) × 24. Với lưới 6×10: hơn 25 tỷ khoá.
+                    Số khoá tiềm năng = 4^(m.k) × 24. Với lưới 6×10: hơn 25 tỷ khoá.
                 </span>
             </p>
         </div>
@@ -536,8 +538,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/navbar.js"></script>
-    <script src="../js/sidebar.js"></script>
-    <script src="../js/warning.js"></script>
+    <script src="../js/sidebar.js"></script>s
     <script src="../js/cardano-rect.js"></script>
 </body>
 

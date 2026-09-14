@@ -10,7 +10,7 @@ const DEFAULT_TEMPLATE_6X10 = [
     [4, 1], [5, 2], [5, 5], [5, 6], [5, 9]
 ];
 
-// Màu theo vị trí: 0=Gốc(emerald), 1=Đảo 180°(violet), 2=Lật dọc(rose), 3=Lật ngang(amber)
+// Màu theo vị trí
 const CARDANO_ROT_COLORS = [
     'bg-emerald-600',
     'bg-violet-500',
@@ -24,31 +24,10 @@ const CARDANO_ROT_BG = [
     'bg-amber-100 dark:bg-amber-900/40'
 ];
 
-// Tên đầy đủ (dùng cho legend, editor, status)
-const CARDANO_ROT_NAMES = [
-    'Gốc',
-    'Đảo 180°',
-    'Lật dọc',
-    'Lật ngang'
-];
+const CARDANO_ROT_NAMES = ['Gốc', 'Đảo 180°', 'Lật dọc', 'Lật ngang'];
 
-// Label dài cho status message
-const POSITION_LABELS = [
-    'Gốc',
-    'Đảo 180°',
-    'Lật dọc',
-    'Lật ngang'
-];
-
-// Text thuần cho badge (trên bảng animation)
-const POSITION_BADGE = [
-    'Gốc',
-    '180°',
-    'Lật dọc',
-    'Lật ngang'
-];
-
-// HTML có icon Font Awesome cho progress step label
+const POSITION_LABELS = ['Gốc', 'Đảo 180°', 'Lật dọc', 'Lật ngang'];
+const POSITION_BADGE = ['Gốc', '180°', 'Lật dọc', 'Lật ngang'];
 const POSITION_ANGLE_HTML = [
     'Gốc',
     '180°',
@@ -56,7 +35,7 @@ const POSITION_ANGLE_HTML = [
     '<i class="fas fa-arrows-left-right"></i>'
 ];
 
-// 24 hoán vị của [0, 1, 2, 3]
+// 24 hoán vị
 const ALL_ORDERS = (function () {
     const result = [];
     function permute(arr, m = []) {
@@ -78,7 +57,6 @@ function findOrderIndex(perm) {
     );
 }
 
-// Mặc định: vị trí 1 → 2 → 3 → 4 (mới) = [0, 1, 2, 3]
 const DEFAULT_ORDER = [0, 1, 2, 3];
 const DEFAULT_ORDER_INDEX = findOrderIndex(DEFAULT_ORDER);
 let currentOrderIndex = DEFAULT_ORDER_INDEX;
@@ -88,6 +66,9 @@ let cardanoGridRows = 6;
 let cardanoGridCols = 10;
 let currentModeGlobal = 'encrypt';
 let currentCardanoResult = null;
+
+// Vị trí hiện tại của grille (dùng cho logic animation)
+let currentGrillePos = 0;
 
 // ---------- ORDER ----------
 
@@ -99,20 +80,14 @@ function getPositionForStep(stepIdx) {
     return getCurrentOrder()[stepIdx];
 }
 
-function grilleTransformForStep(stepIdx) {
-    return grilleTransform(getPositionForStep(stepIdx));
-}
-
 // ---------- TEMPLATE ----------
 
-// Ánh xạ (r, c) của tờ giấy → ô template gốc dưới vị trí `pos`
-// pos: 0=Gốc, 1=Đảo 180°, 2=Lật dọc, 3=Lật ngang
 function templateCellAt(r, c, pos, rows, cols) {
     switch (pos) {
-        case 0: return [r, c];                              // Gốc
-        case 1: return [rows - 1 - r, cols - 1 - c];        // Đảo 180°
-        case 2: return [rows - 1 - r, c];                   // Lật dọc
-        case 3: return [r, cols - 1 - c];                   // Lật ngang
+        case 0: return [r, c];
+        case 1: return [rows - 1 - r, cols - 1 - c];
+        case 2: return [rows - 1 - r, c];
+        case 3: return [r, cols - 1 - c];
         default: return [r, c];
     }
 }
@@ -126,7 +101,6 @@ function generateFixedTemplate6x10() {
     return template;
 }
 
-// Random force — bỏ qua quy tắc template cố định cho 6×10
 function generateRandomTemplateForce(rows, cols) {
     const template = Array.from({ length: rows }, () => Array(cols).fill(false));
     const assigned = Array.from({ length: rows }, () => Array(cols).fill(false));
@@ -148,7 +122,6 @@ function generateRandomTemplateForce(rows, cols) {
     return template;
 }
 
-// Wrapper — 6×10 luôn dùng template cố định, các lưới khác random
 function generateRandomTemplate(rows, cols) {
     if (rows === 6 && cols === 10) {
         return generateFixedTemplate6x10();
@@ -176,16 +149,40 @@ function turnForCell(template, r, c) {
     return -1;
 }
 
-// CSS transform 3D — hiệu ứng lật thật
+// ============ TRANSFORM ĐƠN TRỤC — mỗi vị trí là 1 phép duy nhất ============
+// Dùng rotateZ cho Đảo 180° (flat spin), rotateX cho Lật dọc, rotateY cho Lật ngang
 function grilleTransform(pos) {
     const pers = 'perspective(1200px)';
     switch (pos) {
-        case 0: return `${pers} rotateY(0deg) rotateX(0deg)`;       // Gốc
-        case 1: return `${pers} rotateY(180deg) rotateX(180deg)`;   // Đảo 180°
-        case 2: return `${pers} rotateY(0deg) rotateX(180deg)`;     // Lật dọc
-        case 3: return `${pers} rotateY(180deg) rotateX(0deg)`;     // Lật ngang
-        default: return `${pers} rotateY(0deg) rotateX(0deg)`;
+        case 0: return `${pers} rotate(0deg) rotateX(0deg) rotateY(0deg)`;
+        case 1: return `${pers} rotate(180deg) rotateX(0deg) rotateY(0deg)`;  // Đảo 180° — xoay phẳng
+        case 2: return `${pers} rotate(0deg) rotateX(180deg) rotateY(0deg)`;  // Lật dọc — lật quanh trục ngang
+        case 3: return `${pers} rotate(0deg) rotateX(0deg) rotateY(180deg)`;  // Lật ngang — lật quanh trục dọc
+        default: return `${pers} rotate(0deg) rotateX(0deg) rotateY(0deg)`;
     }
+}
+
+// ============ ANIMATION HELPER — reset rồi lật đơn trục ============
+async function animateGrilleTo(targetPos) {
+    const grille = document.getElementById('anim-grille');
+    if (!grille) return;
+
+    // Đang ở target rồi → không làm gì
+    if (currentGrillePos === targetPos) return;
+
+    // Nếu cả 2 đều khác 0 → reset về gốc trước (tránh lật chéo)
+    if (currentGrillePos !== 0 && targetPos !== 0) {
+        grille.style.transition = 'transform 1s ease-in-out';
+        grille.style.transform = grilleTransform(0);
+        currentGrillePos = 0;
+        await animSleep(1050);
+    }
+
+    // Lật đơn trục sang target
+    grille.style.transition = 'transform 2s cubic-bezier(0.65, 0, 0.35, 1)';
+    grille.style.transform = grilleTransform(targetPos);
+    currentGrillePos = targetPos;
+    await animSleep(2100);
 }
 
 // ---------- ENCRYPT / DECRYPT ----------
@@ -277,7 +274,20 @@ function getCellConfig(rows, cols) {
         '6x8': { cell: 62, fontSize: 24, headFont: 13, rowLabelW: 34 },
         '6x10': { cell: 52, fontSize: 20, headFont: 12, rowLabelW: 28 }
     };
-    return configs[key] || { cell: 52, fontSize: 20, headFont: 12, rowLabelW: 28 };
+    const base = configs[key] || { cell: 52, fontSize: 20, headFont: 12, rowLabelW: 28 };
+
+    // Trên mobile, giảm cell size và font để vừa khung
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    if (isMobile) {
+        return {
+            ...base,
+            cell: Math.max(28, Math.round(base.cell * 0.7)),
+            fontSize: Math.max(12, Math.round(base.fontSize * 0.7)),
+            headFont: Math.max(9, Math.round(base.headFont * 0.8)),
+            rowLabelW: Math.max(20, Math.round(base.rowLabelW * 0.75))
+        };
+    }
+    return base;
 }
 
 function renderCardanoTemplate() {
@@ -430,7 +440,6 @@ function updateOrderUI() {
 
     if (idxEl) idxEl.textContent = currentOrderIndex + 1;
 
-    // Progress step labels — dùng innerHTML để render icon Font Awesome
     document.querySelectorAll('[data-pos-label]').forEach((el, i) => {
         const pos = getPositionForStep(i);
         el.innerHTML = POSITION_ANGLE_HTML[pos];
@@ -522,7 +531,6 @@ function handleCardanoRectInputWithCursor(textarea, showAlert = true) {
     const cursorPos = textarea.selectionStart;
     const { text: processed, invalidChars } = processCardanoRectInput(original);
 
-    // Hiện toast cảnh báo nếu có ký tự không hợp lệ
     if (showAlert && invalidChars.size > 0) {
         const list = [...invalidChars].slice(0, 5).join(', ');
         const more = invalidChars.size > 5 ? '...' : '';
@@ -639,7 +647,6 @@ document.addEventListener('DOMContentLoaded', function () {
         resetCardanoAnimation();
     });
 
-    // Order buttons
     const orderPrevBtn = document.getElementById('order-prev');
     const orderNextBtn = document.getElementById('order-next');
     const orderResetBtn = document.getElementById('order-reset');
@@ -656,7 +663,6 @@ document.addEventListener('DOMContentLoaded', function () {
         GrassEAD.showMessage('Đã về template & thứ tự mặc định!', 'info');
     });
 
-    // Animation controls
     const animPrevBtn = document.getElementById('anim-prev');
     const animNextBtn = document.getElementById('anim-next');
     const customTemplateBtn = document.getElementById('custom-template');
@@ -760,8 +766,9 @@ function renderAnimStage() {
     const cols = cardanoTemplate[0].length;
     const isDecrypt = currentModeGlobal === 'decrypt';
 
-    const cfg = getCellConfig(rows, cols);
-    const cellFont = cfg.fontSize;
+    // Font tỉ lệ theo bề rộng ô (~36%) — dùng cqw để tự co giãn
+    // theo bề rộng board (to trên màn lớn, nhỏ trên mobile).
+    const cellFontCss = `calc(100cqw / ${cols} * 0.36)`;
 
     let cellsHtml = '';
     for (let r = 0; r < rows; r++) {
@@ -773,7 +780,7 @@ function renderAnimStage() {
                 if (content) extraCls = 'cardano-anim-cell-cipher';
             }
             cellsHtml += `<div class="cardano-anim-cell ${extraCls}" data-r="${r}" data-c="${c}"
-                style="grid-row:${r + 1};grid-column:${c + 1};font-size:${cellFont}px;">${content}</div>`;
+                style="grid-row:${r + 1};grid-column:${c + 1};font-size:${cellFontCss};">${content}</div>`;
         }
     }
 
@@ -789,15 +796,13 @@ function renderAnimStage() {
     }
 
     const aspect = cols / rows;
-    const maxWidth = Math.min(560, cols * 52);
-
-    // ── Góc đánh dấu vàng — đặt ở TOP-RIGHT của board gốc ──
-    // Kích thước: 1.5 cell (nhưng không quá 16% chiều rộng board)
-    const markerSize = `calc(100% / ${cols} * 3)`;
+    // Marker góc ~40% kích thước ô — tự co giãn theo loại bảng,
+    // đủ nhỏ để không che ký tự trong ô top-right.
+    const markerSize = 'calc(100% / 2.5)';
 
     container.innerHTML = `
-        <div class="flex flex-col items-center">
-            <div style="min-height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+        <div class="flex flex-col items-center w-full">
+            <div style="min-height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;width:100%;">
                 <div id="anim-badge" style="
                 min-width:clamp(64px, 18vw, 110px);text-align:center;
                 padding:clamp(4px, 1.2vw, 8px) clamp(12px, 4vw, 24px);
@@ -810,10 +815,11 @@ function renderAnimStage() {
                 box-shadow:0 10px 30px rgba(5,150,105,0.4);
                 letter-spacing:0.05em;">Gốc</div>
             </div>
-            <div class="cardano-anim-board" style="position:relative;width:100%;max-width:${maxWidth}px;aspect-ratio:${aspect};
+            <div class="cardano-anim-board" style="position:relative;width:100%;max-width:min(100%, 560px);aspect-ratio:${aspect};
                 background:#ffffff;border-radius:14px;overflow:hidden;
                 box-shadow:0 20px 45px -15px rgba(5,150,105,0.35), 0 0 0 1px rgba(5,150,105,0.12);
-                perspective:1200px;">
+                perspective:1200px;
+                container-type: inline-size;">
                 <div style="position:absolute;inset:0;display:grid;
                     grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);">
                     ${cellsHtml}
@@ -822,18 +828,17 @@ function renderAnimStage() {
                     display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);
                     transform:${grilleTransform(0)};pointer-events:none;opacity:0;">
 
-                    <!-- Góc đánh dấu vàng — nằm trong grille, xoay cùng grille -->
                     <div id="anim-marker" style="
                         grid-row:1;grid-column:${cols};
                         justify-self:end;align-self:start;
                         width:${markerSize};height:${markerSize};
-                        background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                        background:linear-gradient(135deg, rgba(251,191,36,0.95) 0%, rgba(245,158,11,0.85) 100%);
                         border-top-right-radius:12px;
                         border-bottom-left-radius:100%;
-                        box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4), 0 2px 6px rgba(245,158,11,0.5);
+                        box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4), 0 2px 8px rgba(245,158,11,0.5);
                         z-index:10;
                         pointer-events:none;
-                        transition:opacity 0.3s ease;
+                        opacity:0.9;
                     "></div>
 
                     ${grilleHtml}
@@ -917,19 +922,39 @@ async function fillStepItems(step) {
     }
 }
 
+// ============ ANIMATE STEP — dùng animateGrilleTo để tránh lật chéo ============
 async function animateStepForward(step) {
     activateStep(step);
-    const grille = document.getElementById('anim-grille');
     const pos = getPositionForStep(step);
 
-    if (step > 0) {
+    if (step === 0) {
+        // Lượt gốc: không lật
+        showBadge(POSITION_BADGE[pos]);
+        await animSleep(840);
+    } else {
+        // Nếu cần, reset về gốc trước (để không lật chéo)
+        if (currentGrillePos !== 0) {
+            setAnimStatus(`<i class="fas fa-undo mr-1"></i>Đưa lưới về vị trí gốc...`);
+            showBadge('Gốc');
+            const grille = document.getElementById('anim-grille');
+            if (grille) {
+                grille.style.transition = 'transform 1s ease-in-out';
+                grille.style.transform = grilleTransform(0);
+            }
+            currentGrillePos = 0;
+            await animSleep(1050);
+        }
+
+        // Lật đơn trục sang vị trí mới
         setAnimStatus(`<i class="fas fa-rotate mr-1"></i>Lượt ${step + 1}: ${POSITION_LABELS[pos]}...`);
         showBadge(POSITION_BADGE[pos]);
-        if (grille) grille.style.transform = grilleTransformForStep(step);
-        await animSleep(3150);   // ← 1050ms × 3
-    } else {
-        showBadge(POSITION_BADGE[pos]);
-        await animSleep(840);    // ← 280ms × 3
+        const grille = document.getElementById('anim-grille');
+        if (grille) {
+            grille.style.transition = 'transform 2s cubic-bezier(0.65, 0, 0.35, 1)';
+            grille.style.transform = grilleTransform(pos);
+        }
+        currentGrillePos = pos;
+        await animSleep(2100);
     }
 
     setAnimStatus(`<i class="fas fa-pen mr-1"></i>Điền ký tự vào lỗ khoét — Lượt ${step + 1} (${POSITION_LABELS[pos]})`);
@@ -937,7 +962,7 @@ async function animateStepForward(step) {
 
     markStepDone(step);
     currentAnimStep = step;
-    await animSleep(1260);       // ← 420ms × 3
+    await animSleep(1260);
 }
 
 async function finishAnimation() {
@@ -991,9 +1016,11 @@ async function playCardanoAnimation() {
     }
 
     renderAnimStage();
+    currentGrillePos = 0;
 
     const grille = document.getElementById('anim-grille');
     if (grille) {
+        grille.style.transition = 'none';
         grille.style.transform = grilleTransform(0);
         grille.style.opacity = '1';
     }
@@ -1065,15 +1092,29 @@ async function goToPrevStep() {
 
     if (currentAnimStep >= 0) {
         const pos = getPositionForStep(currentAnimStep);
+
+        // Reset về gốc trước
+        if (currentGrillePos !== 0) {
+            grille.style.transition = 'transform 1s ease-in-out';
+            grille.style.transform = grilleTransform(0);
+            currentGrillePos = 0;
+            await animSleep(1050);
+        }
+
+        // Lật đến vị trí mới
         showBadge(POSITION_BADGE[pos]);
-        if (grille) grille.style.transform = grilleTransformForStep(currentAnimStep);
         setAnimStatus(`<i class="fas fa-rotate-left mr-1"></i>Lùi về lượt ${currentAnimStep + 1} (${POSITION_LABELS[pos]})`);
-        await animSleep(3150);
+        grille.style.transition = 'transform 2s cubic-bezier(0.65, 0, 0.35, 1)';
+        grille.style.transform = grilleTransform(pos);
+        currentGrillePos = pos;
+        await animSleep(2100);
     } else {
         showBadge('Gốc');
-        if (grille) grille.style.transform = grilleTransform(0);
+        grille.style.transition = 'transform 1s ease-in-out';
+        grille.style.transform = grilleTransform(0);
+        currentGrillePos = 0;
         setAnimStatus('<i class="fas fa-rotate-left mr-1"></i>Đã lùi về trạng thái ban đầu');
-        await animSleep(1950);
+        await animSleep(1050);
     }
 
     animPlaying = false;
@@ -1157,6 +1198,7 @@ function resetCardanoAnimation() {
     currentAnimStep = -1;
     animOrderCache = null;
     animCipherGrid = null;
+    currentGrillePos = 0;
 
     const playBtn = document.getElementById('anim-play');
     if (playBtn) playBtn.disabled = false;
@@ -1171,6 +1213,13 @@ function resetCardanoAnimation() {
     if (navEl) navEl.style.display = 'none';
 
     renderAnimStage();
+
+    // Reset transition + transform về mặc định
+    const grille = document.getElementById('anim-grille');
+    if (grille) {
+        grille.style.transition = 'none';
+        grille.style.transform = grilleTransform(0);
+    }
 }
 
 // ==================== CUSTOM TEMPLATE EDITOR ====================

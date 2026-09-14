@@ -159,8 +159,7 @@
 
         .cardano-anim-cell-pad {
             color: #9ca3af !important;
-            font-style: italic;
-            opacity: 0.7;
+            opacity: 0.75;
         }
 
         .dark .cardano-anim-cell-pad {
@@ -266,7 +265,7 @@
     <div id="warning-placeholder"></div>
 
     <main class="max-w-screen-xl mx-auto p-6 flex-1 w-full">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Grille</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Mã hoá Cardan Grille (hình vuông)</h1>
 
         <div class="bg-violet-100 dark:bg-gray-800 border border-violet-200 dark:border-gray-700 p-4 rounded-lg mb-6">
             <p class="text-sm text-gray-700 dark:text-gray-300">
@@ -276,7 +275,7 @@
                 <br>
                 Bản rõ ghi lần lượt vào các lỗ theo 4 lượt xoay, đọc lưới theo hàng để ra bản mã.
                 <br>
-                Ô trống (nếu bản rõ chưa đầy) được lấp bằng <strong>ký tự đệm ngẫu nhiên</strong>.
+                Ô trống (nếu bản rõ chưa đầy) được lấp bằng ký tự <strong>–</strong> (gạch ngang).
                 <br>
                 <span class="text-violet-500 dark:text-violet-400">
                     <i class="fas fa-lightbulb mr-1"></i>
@@ -339,7 +338,8 @@
                         </div>
                     </div>
                     <textarea id="cardano-input" class="input-area" spellcheck="false" autocorrect="off"
-                        autocapitalize="off" placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ)"></textarea>
+                        autocapitalize="off"
+                        placeholder="Nhập văn bản tiếng Nga (ví dụ: ПРИВЕТ). Chấp nhận cả '-' và '–'."></textarea>
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-2">

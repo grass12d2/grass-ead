@@ -1,6 +1,7 @@
 // ==================== CARDANO GRILLE (Решетка Кардано) ====================
 
 const CARDANO_LETTERS = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+const PAD_CHAR = '–';
 const CARDANO_ROT_COLORS = [
     'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'
 ];
@@ -77,7 +78,65 @@ function randomCardanoLetter() {
 }
 
 function prepareCardanoInput(text) {
-    return text.toUpperCase().replace(/Ё/g, 'Е').replace(/[^А-Я]/g, '');
+    let result = '';
+    for (const char of text.toUpperCase()) {
+        if (char === 'Ё') {
+            result += 'Е';
+        } else if (char === '–' || char === '-' || char === '—') {
+            result += PAD_CHAR;
+        } else if (GrassEAD.RUSSIAN_ALPHABET.includes(char)) {
+            result += char;
+        }
+    }
+    return result;
+}
+
+function processCardanoInput(text) {
+    let result = '';
+    const invalidChars = new Set();
+
+    for (const char of text) {
+        if (char === ' ' || char === '\n' || char === '\t') {
+            result += char;
+        } else if (char === '–' || char === '-' || char === '—') {
+            result += PAD_CHAR;
+        } else {
+            const upper = char.toUpperCase();
+            if (upper === 'Ё') {
+                result += 'Е';
+            } else if (GrassEAD.RUSSIAN_ALPHABET.includes(upper)) {
+                result += upper;
+            } else {
+                invalidChars.add(char);
+            }
+        }
+    }
+    return { text: result, invalidChars };
+}
+
+function handleCardanoInputWithCursor(textarea, showAlert = true) {
+    const original = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    const { text: processed, invalidChars } = processCardanoInput(original);
+
+    if (showAlert && invalidChars.size > 0) {
+        const list = [...invalidChars].slice(0, 5).join(', ');
+        const more = invalidChars.size > 5 ? '...' : '';
+        GrassEAD.showMessage(
+            `Ký tự không hợp lệ đã bị loại bỏ: ${list}${more}. Chỉ chấp nhận А-Я, dấu cách, và '-'.`,
+            'error'
+        );
+    }
+
+    if (processed === original) return processed;
+
+    const beforeCursor = original.slice(0, cursorPos);
+    const processedBefore = processCardanoInput(beforeCursor).text;
+    const newCursorPos = Math.min(processedBefore.length, processed.length);
+
+    textarea.value = processed;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    return processed;
 }
 
 function cardanoEncrypt(text, template) {
@@ -97,7 +156,7 @@ function cardanoEncrypt(text, template) {
                     if (idx < clean.length) {
                         grid[r][c] = clean[idx++];
                     } else {
-                        grid[r][c] = randomCardanoLetter();
+                        grid[r][c] = PAD_CHAR;
                         padFlags[r][c] = true;
                     }
                 }
@@ -116,7 +175,7 @@ function cardanoDecrypt(ciphertext, template) {
     const n = template.length;
     const capacity = n * n;
     let clean = prepareCardanoInput(ciphertext);
-    if (clean.length < capacity) clean = clean.padEnd(capacity, '·');
+    if (clean.length < capacity) clean = clean.padEnd(capacity, PAD_CHAR);
     if (clean.length > capacity) clean = clean.slice(0, capacity);
 
     const grid = [];
@@ -184,7 +243,7 @@ function renderCardanoTemplate() {
             if (ch) {
                 content = ch;
                 contentCls += isPad
-                    ? ' text-gray-400 dark:text-gray-500 italic'
+                    ? ' text-gray-400 dark:text-gray-500'
                     : (isEncrypt ? ' text-violet-700 dark:text-violet-300' : ' text-gray-900 dark:text-white');
             } else {
                 content = `<span class="font-mono text-gray-500 dark:text-gray-400"
@@ -212,7 +271,7 @@ function renderCardanoTemplate() {
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
             <i class="fas fa-info-circle mr-1"></i>
             Ô có màu = lỗ khoét của lượt xoay tương ứng. Trong bảng: chữ = ký tự đã ghi; số = lượt xoay điền vào ô.
-            ${isEncrypt ? 'Ký tự <span class="italic text-gray-400">nghiêng xám</span> là đệm ngẫu nhiên.' : ''}
+            ${isEncrypt ? 'Ký tự <strong>–</strong> (xám) là ô đệm trống.' : ''}
         </p>
     `;
 
@@ -302,12 +361,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (input) {
         input.addEventListener('input', function () {
-            GrassEAD.handleTextInputWithCursor(this, true);
+            handleCardanoInputWithCursor(this, true);
             updateCardanoOutput();
         });
         input.addEventListener('paste', function () {
             setTimeout(() => {
-                GrassEAD.handleTextInputWithCursor(this, true);
+                handleCardanoInputWithCursor(this, true);
                 updateCardanoOutput();
             }, 10);
         });
@@ -418,7 +477,7 @@ function prepareAnimOrder(plaintext) {
             for (let c = 0; c < n; c++) {
                 if (isHoleAt(cardanoTemplate, r, c, rot)) {
                     const isPad = idx >= clean.length;
-                    const ch = isPad ? randomCardanoLetter() : clean[idx++];
+                    const ch = isPad ? PAD_CHAR : clean[idx++];
                     order.push({ r, c, ch, rot, isPad });
                 }
             }
@@ -842,7 +901,7 @@ function showAnimResult(order, n) {
         : 'Bản mã (đọc theo hàng)';
     const note = isDecrypt
         ? `Đã đọc ${order.length} ký tự từ bản mã qua 4 lượt`
-        : `${nonPad} ký tự thực + ${pad} ký tự đệm ngẫu nhiên (in nghiêng trên lưới)`;
+        : `${nonPad} ký tự thực + ${pad} ký tự "–" (xám, trên lưới)`;
 
     resultEl.innerHTML = `
         <div class="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800/50">

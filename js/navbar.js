@@ -30,8 +30,8 @@
         { id: 'bellaso', name: 'Bellaso', path: '/pages/bellaso.html', icon: 'fa-key', color: 'pink', desc: 'Vigenère với khoá' },
         { id: 'vigenere-autokey', name: 'Vigenère Autokey', path: '/pages/vigenere-autokey.html', icon: 'fa-lock', color: 'orange', desc: 'Gamma = Khoá + Văn bản' },
         { id: 'vigenere-ctkey', name: 'Vigenère Ciphertext', path: '/pages/vigenere-ctkey.html', icon: 'fa-lock-open', color: 'cyan', desc: 'Gamma = Khoá + Bản mã' },
-        { id: 'cardano', name: 'Cardan Grille', path: '/pages/cardano.html', icon: 'fa-border-all', color: 'violet', desc: 'Lưới khoét xoay 4 vị trí' },
-        { id: 'cardano-rect', name: 'Cardan Rect', path: '/pages/cardano-rect.html', icon: 'fa-table-cells-large', color: 'emerald', desc: 'Lưới chữ nhật — 24 thứ tự' },
+        { id: 'cardano', name: 'Cardan Grille (hình vuông)', path: '/pages/cardano.html', icon: 'fa-border-all', color: 'violet', desc: 'Lưới khoét xoay 4 vị trí' },
+        { id: 'cardano-rect', name: 'Cardan Grille (hình chữ nhật)', path: '/pages/cardano-rect.html', icon: 'fa-table-cells-large', color: 'emerald', desc: 'Lưới chữ nhật — 24 thứ tự' },
     ];
 
     let isInPages = false;
