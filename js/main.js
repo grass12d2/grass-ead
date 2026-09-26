@@ -1,5 +1,19 @@
 // ==================== XỬ LÝ VĂN BẢN ====================
 
+// ==================== VIEWPORT HEIGHT TRACKER ====================
+// Mobile (Safari iOS, Chrome Android) có address bar co giãn → 100vh sai.
+// Set --vh = 1% chiều cao thực của viewport, cập nhật mỗi khi resize/orient.
+(function setupVH() {
+    function setVH() {
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+    }
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    // iOS Safari đôi khi bắn resize muộn → check thêm sau 200ms
+    setTimeout(setVH, 200);
+})();
+
 // ==================== SCROLL CONTAINER WRAPPER ====================
 // Bọc <main> + #footer-placeholder trong #scroll-container để viewport
 // không có scrollbar → navbar span full width (giống YouTube).

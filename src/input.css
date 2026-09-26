@@ -548,23 +548,22 @@ button:focus {
 
 /* ==================== SCROLL CONTAINER + GLOBAL SCROLLBAR ==================== */
 /*
- * html không scroll, #scroll-container (bọc main + footer) đảm nhiệm scroll.
- * Nhờ đó scrollbar viewport không xuất hiện → navbar span full width.
+ * html không scroll, #scroll-container đảm nhiệm scroll.
+ * Dùng --vh (JS set) thay cho 100vh/100dvh để tránh lỗi address bar mobile.
  *
- * - html/body: height 100vh, overflow hidden
- * - #scroll-container: flex-1, min-height:0, overflow-y auto
+ * Fallback: nếu JS chưa chạy, dùng 1vh (best-effort).
  */
 html,
 body {
-  height: 100vh;
-  height: 100dvh;
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: 0;
+  /* override min-h-screen nếu lỡ còn sót trong HTML */
   overflow: hidden;
 }
 
 #scroll-container {
   flex: 1;
   min-height: 0;
-  /* QUAN TRỌNG: cho phép flex item co lại */
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
