@@ -589,8 +589,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (modeEncrypt) modeEncrypt.addEventListener('click', () => {
         if (currentModeGlobal === 'encrypt') return;
         currentModeGlobal = 'encrypt';
-        if (input) input.value = '';
-        if (output) output.value = '';
         currentCardanoResult = null;
         updateCardanoUI();
         updateCardanoOutput();
@@ -600,8 +598,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (modeDecrypt) modeDecrypt.addEventListener('click', () => {
         if (currentModeGlobal === 'decrypt') return;
         currentModeGlobal = 'decrypt';
-        if (input) input.value = '';
-        if (output) output.value = '';
         currentCardanoResult = null;
         updateCardanoUI();
         updateCardanoOutput();

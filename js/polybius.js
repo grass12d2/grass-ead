@@ -341,24 +341,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function processDecryptInput(rawText, cursorPos) {
         const digits = [];
-        const invalidChars = [];
+        const invalidDigits = [];   // 0, 7, 8, 9
+        const invalidLetters = [];  // А-Я, а-я, Ё, ё, A-Z, a-z
+        const otherInvalid = [];    // dấu câu, ký tự đặc biệt...
 
         for (let char of rawText) {
             if (char >= '1' && char <= '6') {
                 digits.push(char);
             } else if (char >= '0' && char <= '9') {
-                invalidChars.push(char);
+                invalidDigits.push(char);
+            } else if (/[А-Яа-яЁёA-Za-z]/.test(char)) {
+                invalidLetters.push(char);
+            } else if (char === ' ' || char === '\n' || char === '\t') {
+                // bỏ qua khoảng trắng (không báo lỗi)
+            } else {
+                otherInvalid.push(char);
             }
         }
 
-        if (invalidChars.length > 0) {
-            const uniqueInvalid = [...new Set(invalidChars)].join(', ');
+        // ===== Toast thông báo =====
+        // Ưu tiên báo chữ cái (vì user hỏi riêng), sau đó đến số sai, cuối cùng là ký tự khác
+        if (invalidLetters.length > 0) {
+            const unique = [...new Set(invalidLetters)].slice(0, 5).join(', ').toUpperCase();
+            const more = invalidLetters.length > 5 ? '...' : '';
             GrassEAD.showMessage(
-                `Số "${uniqueInvalid}" không hợp lệ. Chỉ chấp nhận số 1-6!`,
+                `Ký tự chữ cái không hợp lệ đã bị loại bỏ: ${unique}${more}. Chỉ chấp nhận số 1-6.`,
+                'error'
+            );
+        } else if (invalidDigits.length > 0) {
+            const unique = [...new Set(invalidDigits)].slice(0, 5).join(', ').toUpperCase();
+            const more = invalidDigits.length > 5 ? '...' : '';
+            GrassEAD.showMessage(
+                `Số "${unique}${more}" không hợp lệ. Chỉ chấp nhận số 1-6!`,
+                'error'
+            );
+        } else if (otherInvalid.length > 0) {
+            const unique = [...new Set(otherInvalid)].slice(0, 5).join(', ').toUpperCase();
+            const more = otherInvalid.length > 5 ? '...' : '';
+            GrassEAD.showMessage(
+                `Ký tự không hợp lệ đã bị loại bỏ: ${unique}${more}. Chỉ chấp nhận số 1-6.`,
                 'error'
             );
         }
 
+        // ===== Format lại chuỗi số thành cặp, có dấu cách =====
         let formatted = '';
         for (let i = 0; i < digits.length; i++) {
             formatted += digits[i];
@@ -367,6 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // ===== Tính lại vị trí con trỏ =====
         let digitsBeforeCursor = 0;
         for (let i = 0; i < cursorPos && i < rawText.length; i++) {
             if (rawText[i] >= '1' && rawText[i] <= '6') {

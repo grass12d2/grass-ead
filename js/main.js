@@ -1,5 +1,29 @@
 // ==================== XỬ LÝ VĂN BẢN ====================
 
+// ==================== SCROLL CONTAINER WRAPPER ====================
+// Bọc <main> + #footer-placeholder trong #scroll-container để viewport
+// không có scrollbar → navbar span full width (giống YouTube).
+// Chạy TRƯỚC mọi script khác vì file này load đầu tiên.
+(function wrapScrollContainer() {
+    // Đã wrap rồi thì bỏ qua
+    if (document.getElementById('scroll-container')) return;
+
+    const main = document.querySelector('body > main');
+    const footer = document.getElementById('footer-placeholder');
+    if (!main || !footer) return;
+
+    // Tạo wrapper
+    const wrapper = document.createElement('div');
+    wrapper.id = 'scroll-container';
+
+    // Chèn wrapper vào đúng vị trí main
+    main.parentNode.insertBefore(wrapper, main);
+
+    // Di chuyển main + footer vào wrapper
+    wrapper.appendChild(main);
+    wrapper.appendChild(footer);
+})();
+
 // Chuẩn hoá Ё → Е
 function normalizeRussianText(text) {
     return text.replace(/[Ёё]/g, match => match === 'Ё' ? 'Е' : 'е');
@@ -164,9 +188,11 @@ function hidePopup(popup) {
 
 // ==================== XỬ LÝ INPUT ====================
 
-// Xử lý input: chuyển UPPERCASE và kiểm tra ký tự hợp lệ
+// Xử lý input: chuẩn hoá Ё→Е, chuyển UPPERCASE, kiểm tra ký tự hợp lệ
 function handleTextInput(text, showAlert = true) {
-    let upperText = text.toUpperCase();
+    // 1. Chuẩn hoá Ё/ё → Е/е (silent — không báo lỗi, không xoá)
+    // 2. Uppercase toàn bộ
+    let upperText = normalizeRussianText(text).toUpperCase();
 
     if (showAlert) {
         for (let char of upperText) {

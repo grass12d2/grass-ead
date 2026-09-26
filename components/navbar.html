@@ -7,9 +7,9 @@
             <!-- Bên trái: Toggle + Logo text -->
             <div class="flex items-center gap-3 flex-shrink-0">
                 <button id="tools-toggle" type="button"
-                    class="text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-lg p-2.5 transition-colors"
+                    class="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-400 rounded-full transition-colors"
                     aria-label="Mở công cụ" aria-controls="tools-drawer">
-                    <i class="fas fa-bars text-xl"></i>
+                    <i class="fas fa-bars text-xl leading-none"></i>
                 </button>
                 <a href="/index.html" class="group flex items-baseline gap-1.5">
                     <span
@@ -45,17 +45,18 @@
             <!-- Bên phải: Search mobile + Theme toggle -->
             <div class="flex items-center gap-2 flex-shrink-0">
                 <button id="search-mobile-trigger" type="button"
-                    class="md:hidden text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 rounded-lg p-2.5 transition-colors"
+                    class="md:hidden w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-400 rounded-full transition-colors"
                     aria-label="Tìm kiếm">
-                    <i class="fas fa-search text-lg"></i>
+                    <i class="fas fa-search text-lg leading-none"></i>
                 </button>
 
                 <!-- Theme toggle: dùng Font Awesome icon thay vì SVG -->
                 <button id="theme-toggle" type="button"
-                    class="text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-lg p-2.5 transition-colors"
+                    class="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-amber-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-full transition-colors"
                     aria-label="Đổi theme">
-                    <i id="theme-toggle-dark-icon" class="fas fa-moon text-lg" style="display: inline;"></i>
-                    <i id="theme-toggle-light-icon" class="fas fa-sun text-lg" style="display: none;"></i>
+                    <i id="theme-toggle-dark-icon" class="fas fa-moon text-lg leading-none"
+                        style="display: inline;"></i>
+                    <i id="theme-toggle-light-icon" class="fas fa-sun text-lg leading-none" style="display: none;"></i>
                 </button>
             </div>
         </div>
