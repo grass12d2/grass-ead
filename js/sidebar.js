@@ -24,6 +24,49 @@
         backdrop.classList.remove('opacity-0', 'pointer-events-none');
         backdrop.classList.add('opacity-100', 'pointer-events-auto');
         document.body.style.overflow = 'hidden';
+        document.documentElement.classList.add('drawer-open');
+    }
+
+    function closeDrawer() {
+        const drawer = document.getElementById('tools-drawer');
+        const backdrop = document.getElementById('tools-backdrop');
+        if (!drawer || !backdrop) return;
+
+        drawer.classList.add('-translate-x-full');
+        drawer.classList.remove('translate-x-0');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+        document.body.style.overflow = '';
+        document.documentElement.classList.remove('drawer-open');
+    }
+
+    // NEW: toggle
+    function toggleDrawer() {
+        const drawer = document.getElementById('tools-drawer');
+        if (!drawer) return;
+        const isOpen = !drawer.classList.contains('-translate-x-full');
+        if (isOpen) closeDrawer();
+        else openDrawer();
+    }
+
+    // NEW: đánh dấu link đang active
+    function highlightActivePage() {
+        const sidebarPh = document.getElementById('sidebar-placeholder');
+        if (!sidebarPh) return;
+
+        const currentPage = (window.location.pathname.split('/').pop() || 'index.html').split('?')[0];
+
+        sidebarPh.querySelectorAll('a[href]').forEach(a => {
+            const href = (a.getAttribute('href') || '').split('?')[0];
+            const hrefPage = href.split('/').pop();
+            if (hrefPage && hrefPage === currentPage) {
+                a.classList.add('sidebar-link-active');
+                a.setAttribute('aria-current', 'page');
+            } else {
+                a.classList.remove('sidebar-link-active');
+                a.removeAttribute('aria-current');
+            }
+        });
     }
 
     function closeDrawer() {
@@ -91,7 +134,7 @@
         window.__sidebarEventsBound = true;
 
         document.addEventListener('click', function (e) {
-            if (e.target.closest('#tools-toggle')) { openDrawer(); return; }
+            if (e.target.closest('#tools-toggle')) { toggleDrawer(); return; }
             if (e.target.closest('#tools-close')) { closeDrawer(); return; }
             if (e.target.closest('#tools-backdrop')) { closeDrawer(); return; }
 
@@ -141,11 +184,16 @@
                 const res = await fetch(basePath + 'components/sidebar.html' + cacheBust);
                 if (res.ok) {
                     sidebarPh.innerHTML = await res.text();
-                    if (isInPages) {
-                        sidebarPh.querySelectorAll('a[href^="/"]').forEach(a => {
-                            a.setAttribute('href', '..' + a.getAttribute('href'));
-                        });
-                    }
+
+                    // Rewrite link tương đối: khi ở /pages/ thì prefix "../"
+                    // (bỏ qua link external, hash, mailto, tel)
+                    sidebarPh.querySelectorAll('a[href]').forEach(a => {
+                        const href = a.getAttribute('href');
+                        if (!href) return;
+                        if (/^(https?:|mailto:|tel:|#|\/\/)/.test(href)) return;
+                        if (href.startsWith('../') || href.startsWith('./')) return;
+                        a.setAttribute('href', (isInPages ? '../' : '') + href);
+                    });
                 }
             } catch (err) {
                 console.error('[Sidebar] Load error:', err);
@@ -156,6 +204,7 @@
 
         updateNavbarHeight();
         bindSidebarEvents();
+        highlightActivePage();
 
         console.log('[Sidebar] Ready, navbar height:', document.documentElement.style.getPropertyValue('--navbar-height'));
     }

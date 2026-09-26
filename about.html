@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi" class="light">
+
+<head>
+    <script>
+        (function () {
+            try {
+                var s = localStorage.getItem('theme');
+                var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+            } catch (e) { }
+        })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thông tin - Grass EAD</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="css/output.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body class="min-h-screen bg-amber-50 dark:bg-gray-900 flex flex-col">
+    <div id="navbar-placeholder"></div>
+    <div id="sidebar-placeholder"></div>
+    <div id="warning-placeholder"></div>
+
+    <main class="max-w-screen-xl mx-auto p-6 flex-1 w-full">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Thông tin</h1>
+
+        <div class="max-w-2xl mx-auto space-y-6">
+
+            <!-- Profile -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-amber-200 dark:border-gray-700 p-8">
+                <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <div
+                        class="w-24 h-24 rounded-full overflow-hidden shadow-lg shadow-amber-500/30 flex-shrink-0 ring-4 ring-amber-200 dark:ring-amber-500/30">
+                        <img src="img/avatar.png" alt="Avatar của Lường Văn Đức" class="w-full h-full object-cover"
+                            loading="lazy" />
+                    </div>
+                    <div class="text-center sm:text-left flex-1">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Lường Văn Đức</h2>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">
+                            Sinh viên yêu thích mật mã học cổ điển.
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                            Grass EAD là bộ sưu tập công cụ mã hoá &amp; giải mã các thuật toán cổ điển
+                            (Caesar, Atbash, Polybius, Vigenère, Cardan Grille, …), kèm hoạt ảnh trực quan
+                            giúp việc học trở nên dễ hiểu hơn.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liên hệ -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-amber-200 dark:border-gray-700 p-6">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
+                    <i class="fas fa-address-card mr-2 text-amber-500"></i>Liên hệ
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <a href="mailto:luongduc@mail.ru"
+                        class="group flex items-center gap-3 p-4 rounded-xl bg-amber-50 dark:bg-gray-700/50 border border-amber-100 dark:border-gray-700 hover:border-amber-300 dark:hover:border-gray-500 hover:bg-amber-100/70 dark:hover:bg-gray-700 transition-all">
+                        <span
+                            class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-envelope text-red-600 dark:text-red-400"></i>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                Email
+                            </span>
+                            <span class="block text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                luongduc@mail.ru
+                            </span>
+                        </span>
+                        <i
+                            class="fas fa-arrow-up-right-from-square text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </a>
+
+                    <a href="https://github.com/grass12d2" target="_blank" rel="noopener noreferrer"
+                        class="group flex items-center gap-3 p-4 rounded-xl bg-amber-50 dark:bg-gray-700/50 border border-amber-100 dark:border-gray-700 hover:border-amber-300 dark:hover:border-gray-500 hover:bg-amber-100/70 dark:hover:bg-gray-700 transition-all">
+                        <span
+                            class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fab fa-github text-gray-800 dark:text-white text-lg"></i>
+                        </span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                GitHub
+                            </span>
+                            <span class="block text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                @grass12d2
+                            </span>
+                        </span>
+                        <i
+                            class="fas fa-arrow-up-right-from-square text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Repo -->
+            <a href="https://github.com/grass12d2/grass-ead" target="_blank" rel="noopener noreferrer"
+                class="group block bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 border border-gray-700 hover:shadow-xl hover:border-amber-500/40 transition-all">
+                <div class="flex items-start gap-4">
+                    <span
+                        class="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-github text-amber-400 text-2xl"></i>
+                    </span>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            grass-ead
+                            <i
+                                class="fas fa-arrow-up-right-from-square text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </h3>
+                        <p class="text-sm text-gray-400 mt-1">
+                            Mã nguồn mở của bộ công cụ mã hoá cổ điển này.
+                        </p>
+                        <div class="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fas fa-code-branch"></i> main
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/sidebar.js"></script>
+    <!-- <script src="js/warning.js"></script> -->
+</body>
+
+</html>
